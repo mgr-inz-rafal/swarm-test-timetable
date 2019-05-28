@@ -5,5 +5,4 @@ authors = ["mgr-inz-rafal <rchabowski@gmail.com>"]
 edition = "2018"
 
 [dependencies]
-find_folder = "0.3.0"
-piston_window = "0.93.0"
+piston_window = "*"
