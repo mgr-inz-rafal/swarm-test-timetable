@@ -5,21 +5,35 @@ use std::hash::Hash;
 
 const SCREEN_SIZE_NATIVE: [u32; 2] = [1920, 1080];
 
-#[derive(Eq, PartialEq, Hash)]
-enum Textures {
+#[derive(Copy, Clone, Eq, PartialEq, Hash)]
+enum TextureId {
     Background,
+    Test,
 }
 
-fn load_textures(depot: &mut HashMap<Textures, G2dTexture>, context: &mut G2dTextureContext) {
-    let test_image: G2dTexture = Texture::from_path(
-        context,
-        "images/backgrounds/darlington.jpg",
-        Flip::None,
-        &TextureSettings::new(),
-    )
-    .unwrap();
+struct TextureDef {
+    id: TextureId,
+    path: &'static str,
+}
 
-    depot.insert(Textures::Background, test_image);
+const TEXTURE_REPOSITORY: [TextureDef; 2] = [
+    TextureDef {
+        id: TextureId::Background,
+        path: "images/backgrounds/darlington.jpg",
+    },
+    TextureDef {
+        id: TextureId::Test,
+        path: "images/test_image.png",
+    },
+];
+
+fn load_textures(depot: &mut HashMap<TextureId, G2dTexture>, context: &mut G2dTextureContext) {
+    TEXTURE_REPOSITORY.iter().for_each(|x| {
+        depot.insert(
+            x.id,
+            Texture::from_path(context, x.path, Flip::None, &TextureSettings::new()).unwrap(),
+        );
+    });
 }
 
 fn main() {
@@ -41,7 +55,11 @@ fn main() {
     while let Some(e) = window.next() {
         window.draw_2d(&e, |c, g, _| {
             clear([1.0; 4], g);
-            image(texture_depot.get(&Textures::Background).unwrap(), c.transform, g);
+            image(
+                texture_depot.get(&TextureId::Background).unwrap(),
+                c.transform,
+                g,
+            );
         });
     }
 }
