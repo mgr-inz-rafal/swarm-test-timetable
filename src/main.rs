@@ -1,7 +1,6 @@
 extern crate piston_window;
 use piston_window::*;
 use std::collections::HashMap;
-use std::hash::Hash;
 
 const SCREEN_SIZE_NATIVE: [u32; 2] = [1920, 1080];
 
@@ -63,11 +62,10 @@ fn main() {
 
             let c1 = c.trans(300.0, 200.0);
 
-            image(
-                texture_depot.get(&TextureId::Test).unwrap(),
-                c1.transform,
-                g,
-            );
+            let bert_image = Image::new_color([1.0, 0.5, 0.5, 0.5]);
+            let bert_tex = texture_depot.get(&TextureId::Test).unwrap();
+
+            bert_image.draw(bert_tex, &c.draw_state, c1.transform, g);
         });
 
     }
