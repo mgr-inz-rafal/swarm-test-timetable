@@ -54,12 +54,21 @@ fn main() {
 
     while let Some(e) = window.next() {
         window.draw_2d(&e, |c, g, _| {
-            clear([1.0; 4], g);
+            clear([0.0; 4], g);
             image(
                 texture_depot.get(&TextureId::Background).unwrap(),
                 c.transform,
                 g,
             );
+
+            let c1 = c.trans(300.0, 200.0);
+
+            image(
+                texture_depot.get(&TextureId::Test).unwrap(),
+                c1.transform,
+                g,
+            );
         });
+
     }
 }
