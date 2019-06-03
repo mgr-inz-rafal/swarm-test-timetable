@@ -75,7 +75,6 @@ fn load_layout(game: &mut MyGameType, id: u32) -> Result<()> {
     let mut buffer = BufReader::new(file);
     buffer.by_ref().lines().enumerate().for_each(|(y, line)| {
         line.unwrap().chars().enumerate().for_each(|(x, c)| {
-            println!("At ({},{}) = '{}'", x, y, c);
             game.add_slot(Slot::new(
                 (BOARD_MARGIN + (TILE_WIDTH + TILE_SPACING) * x as u32) as f64,
                 (0 + (TILE_HEIGHT + TILE_SPACING) * y as u32) as f64,
@@ -88,7 +87,7 @@ fn load_layout(game: &mut MyGameType, id: u32) -> Result<()> {
                     taken_from: None,
                 }),
                 swarm::SlotKind::CLASSIC,
-            ));
+            ))
         })
     });
 
@@ -127,14 +126,19 @@ fn main() -> Result<()> {
                 g,
             );
 
-            // Paint tiles
-
-            let c1 = c.trans(300.0, 200.0);
-
-            let bert_image = Image::new_color([1.0, 0.5, 0.5, 0.5]);
-            let bert_tex = texture_depot.get(&TextureId::Test).unwrap();
-
-            bert_image.draw(bert_tex, &c.draw_state, c1.transform, g);
+            // Paint slots
+            game.get_slots().iter().for_each(|&s| {
+                let pos = s.get_position();
+                let context = c.trans(pos.x, pos.y);
+                Image::new_color([1.0, 1.0, 1.0, 0.85]).draw(
+                    texture_depot
+                        .get(&s.get_payloads()[0].unwrap().cargo)
+                        .unwrap(),
+                    &c.draw_state,
+                    context.transform,
+                    g,
+                );
+            });
         });
     }
 
