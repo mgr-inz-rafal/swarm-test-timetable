@@ -1,10 +1,11 @@
-extern crate swarm;
 extern crate piston_window;
+extern crate swarm;
 
 use piston_window::*;
 use std::collections::HashMap;
 use std::fs::File;
 use std::io::{BufRead, BufReader, Read, Result};
+use swarm::{Payload, Slot};
 
 const SCREEN_SIZE_NATIVE: [u32; 2] = [1920, 1080];
 const TILE_WIDTH: u32 = 44;
@@ -28,6 +29,8 @@ struct TextureDef {
     id: TextureId,
     path: &'static str,
 }
+
+type MyGameType = swarm::Swarm<TextureId>;
 
 const TEXTURE_REPOSITORY: [TextureDef; 6] = [
     TextureDef {
@@ -65,14 +68,29 @@ fn load_textures(depot: &mut HashMap<TextureId, G2dTexture>, context: &mut G2dTe
     });
 }
 
-fn load_layout(id: u32) -> Result<()> {
+fn load_layout(game: &mut MyGameType, id: u32) -> Result<()> {
     let file = format!("layouts/layout{}.txt", id);
     println!("Loading layout from '{}'", file);
     let file = File::open(file)?;
     let mut buffer = BufReader::new(file);
-    for line in buffer.by_ref().lines() {
-        line.unwrap().chars().enumerate().for_each(|(i, c)| println!("At ({},?) = {}", i, c));
-    }
+    buffer.by_ref().lines().enumerate().for_each(|(y, line)| {
+        line.unwrap().chars().enumerate().for_each(|(x, c)| {
+            println!("At ({},{}) = '{}'", x, y, c);
+            game.add_slot(Slot::new(
+                (BOARD_MARGIN + (TILE_WIDTH + TILE_SPACING) * x as u32) as f64,
+                (0 + (TILE_HEIGHT + TILE_SPACING) * y as u32) as f64,
+                Some(Payload {
+                    cargo: TextureId::TileA,
+                    taken_from: None,
+                }),
+                Some(Payload {
+                    cargo: TextureId::TileW,
+                    taken_from: None,
+                }),
+                swarm::SlotKind::CLASSIC,
+            ));
+        })
+    });
 
     Ok(())
 }
@@ -89,11 +107,13 @@ fn main() -> Result<()> {
     .build()
     .unwrap();
 
+    let mut game = swarm::Swarm::new();
+
     let mut ctx = window.create_texture_context();
     let mut texture_depot = HashMap::new();
     load_textures(&mut texture_depot, &mut ctx);
 
-    load_layout(1)?;
+    load_layout(&mut game, 1)?;
 
     while let Some(e) = window.next() {
         window.draw_2d(&e, |c, g, _| {
