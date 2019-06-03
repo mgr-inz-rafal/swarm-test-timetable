@@ -13,7 +13,8 @@ const TILE_HEIGHT: u32 = 54;
 const TILE_SPACING: u32 = (50 - TILE_WIDTH) / 2;
 const TILES_PER_ROW: u32 = 36;
 const TILES_PER_COLUMN: u32 = 15;
-const BOARD_MARGIN: u32 = (SCREEN_SIZE_NATIVE[0] - (TILE_WIDTH + TILE_SPACING) * TILES_PER_ROW) / 2;
+const BOARD_LEFT_MARGIN: u32 = (SCREEN_SIZE_NATIVE[0] - (TILE_WIDTH + TILE_SPACING) * TILES_PER_ROW) / 2;
+const BOARD_TOP_MARGIN: u32 = (SCREEN_SIZE_NATIVE[1] - (TILE_HEIGHT + TILE_SPACING) * TILES_PER_COLUMN) / 2;
 
 #[derive(Copy, Clone, Eq, PartialEq, Hash)]
 enum TextureId {
@@ -76,8 +77,8 @@ fn load_layout(game: &mut MyGameType, id: u32) -> Result<()> {
     buffer.by_ref().lines().enumerate().for_each(|(y, line)| {
         line.unwrap().chars().enumerate().for_each(|(x, c)| {
             game.add_slot(Slot::new(
-                (BOARD_MARGIN + (TILE_WIDTH + TILE_SPACING) * x as u32) as f64,
-                (0 + (TILE_HEIGHT + TILE_SPACING) * y as u32) as f64,
+                (BOARD_LEFT_MARGIN + (TILE_WIDTH + TILE_SPACING) * x as u32) as f64,
+                (BOARD_TOP_MARGIN + (TILE_HEIGHT + TILE_SPACING) * y as u32) as f64,
                 Some(Payload {
                     cargo: TextureId::TileA,
                     taken_from: None,
