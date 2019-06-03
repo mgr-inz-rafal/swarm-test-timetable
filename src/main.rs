@@ -3,11 +3,20 @@ use piston_window::*;
 use std::collections::HashMap;
 
 const SCREEN_SIZE_NATIVE: [u32; 2] = [1920, 1080];
+const TILE_WIDTH: u32 = 44;
+const TILE_HEIGHT: u32 = 54;
+const TILE_SPACING: u32 = (50 - TILE_WIDTH) / 2;
+const TILES_PER_ROW: u32 = 36;
+const BOARD_MARGIN: u32 = (SCREEN_SIZE_NATIVE[0] - (TILE_WIDTH + TILE_SPACING) * TILES_PER_ROW) / 2;
 
 #[derive(Copy, Clone, Eq, PartialEq, Hash)]
 enum TextureId {
     Background,
     Test,
+    TileBlank,
+    TileA,
+    TileR,
+    TileW,
 }
 
 struct TextureDef {
@@ -15,14 +24,30 @@ struct TextureDef {
     path: &'static str,
 }
 
-const TEXTURE_REPOSITORY: [TextureDef; 2] = [
+const TEXTURE_REPOSITORY: [TextureDef; 6] = [
+    TextureDef {
+        id: TextureId::Test,
+        path: "images/test_image.png",
+    },
     TextureDef {
         id: TextureId::Background,
         path: "images/backgrounds/darlington.jpg",
     },
     TextureDef {
-        id: TextureId::Test,
-        path: "images/test_image.png",
+        id: TextureId::TileBlank,
+        path: "images/tiles/tile_blank.png",
+    },
+    TextureDef {
+        id: TextureId::TileA,
+        path: "images/tiles/tile_A.png",
+    },
+    TextureDef {
+        id: TextureId::TileR,
+        path: "images/tiles/tile_R.png",
+    },
+    TextureDef {
+        id: TextureId::TileW,
+        path: "images/tiles/tile_W.png",
     },
 ];
 
@@ -53,12 +78,17 @@ fn main() {
 
     while let Some(e) = window.next() {
         window.draw_2d(&e, |c, g, _| {
+            // Clear
             clear([0.0; 4], g);
+
+            // Paint backgrouns
             image(
                 texture_depot.get(&TextureId::Background).unwrap(),
                 c.transform,
                 g,
             );
+
+            // Paint tiles
 
             let c1 = c.trans(300.0, 200.0);
 
