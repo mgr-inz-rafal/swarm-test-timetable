@@ -93,18 +93,26 @@ fn load_layout(game: &mut MyGameType, id: u32) -> Result<()> {
     let file = File::open(file)?;
     let mut buffer = BufReader::new(file);
     buffer.by_ref().lines().enumerate().for_each(|(y, line)| {
+        let mut flip_flop = true;
+        let mut payload_being_set = None;
         line.unwrap()
             .chars()
             .filter(|c| !is_tile_delimiter(c))
             .enumerate()
             .for_each(|(x, c)| {
-                game.add_slot(Slot::new(
-                    (BOARD_LEFT_MARGIN + (TILE_WIDTH + TILE_SPACING) * x as u32) as f64,
-                    (BOARD_TOP_MARGIN + (TILE_HEIGHT + TILE_SPACING) * y as u32) as f64,
-                    Some(Payload::new(TextureId::from_char(c))),
-                    Some(Payload::new(TextureId::from_char(c))),
-                    swarm::SlotKind::CLASSIC,
-                ))
+                if flip_flop {
+                    payload_being_set = Some(Payload::new(TextureId::from_char(c)));
+                    flip_flop = false;
+                } else {
+                    game.add_slot(Slot::new(
+                        (BOARD_LEFT_MARGIN + (TILE_WIDTH + TILE_SPACING) * (x / 2) as u32) as f64,
+                        (BOARD_TOP_MARGIN + (TILE_HEIGHT + TILE_SPACING) * y as u32) as f64,
+                        payload_being_set,
+                        Some(Payload::new(TextureId::from_char(c))),
+                        swarm::SlotKind::CLASSIC,
+                    ));
+                    flip_flop = true;
+                };
             })
     });
 
