@@ -92,14 +92,8 @@ fn load_layout(game: &mut MyGameType, id: u32) -> Result<()> {
             game.add_slot(Slot::new(
                 (BOARD_LEFT_MARGIN + (TILE_WIDTH + TILE_SPACING) * x as u32) as f64,
                 (BOARD_TOP_MARGIN + (TILE_HEIGHT + TILE_SPACING) * y as u32) as f64,
-                Some(Payload {
-                    cargo: TextureId::from_char(c),
-                    taken_from: None,
-                }),
-                Some(Payload {
-                    cargo: TextureId::from_char(c),
-                    taken_from: None,
-                }),
+                Some(Payload::new(TextureId::from_char(c))),
+                Some(Payload::new(TextureId::from_char(c))),
                 swarm::SlotKind::CLASSIC,
             ))
         })
