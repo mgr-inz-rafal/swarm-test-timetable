@@ -5,7 +5,7 @@ use piston_window::*;
 use std::collections::HashMap;
 use std::fs::File;
 use std::io::{BufRead, BufReader, Read, Result};
-use swarm::{Payload, Slot};
+use swarm::{Carrier, Payload, Slot};
 
 const SCREEN_SIZE_NATIVE: [u32; 2] = [1920, 1080];
 const TILE_WIDTH: u32 = 44;
@@ -22,6 +22,7 @@ const TILE_DELIMITER: char = '^';
 #[derive(Copy, Clone, Eq, PartialEq, Hash)]
 enum TextureId {
     Background,
+    Carrier,
     Test,
     TileBlank,
     TileA,
@@ -47,10 +48,14 @@ struct TextureDef {
 
 type MyGameType = swarm::Swarm<TextureId>;
 
-const TEXTURE_REPOSITORY: [TextureDef; 6] = [
+const TEXTURE_REPOSITORY: [TextureDef; 7] = [
     TextureDef {
         id: TextureId::Test,
         path: "images/test_image.png",
+    },
+    TextureDef {
+        id: TextureId::Carrier,
+        path: "images/carrier/carrier.png",
     },
     TextureDef {
         id: TextureId::Background,
@@ -148,27 +153,51 @@ fn main() -> Result<()> {
 
     load_layout(&mut game, 1)?;
 
+    game.add_carrier(Carrier::new(50.0, 50.0));
+
     while let Some(e) = window.next() {
-        window.draw_2d(&e, |c, g, _| {
+        game.tick();
+        window.draw_2d(&e, |ctx, g, _| {
             // Clear
             clear([0.0; 4], g);
 
             // Paint backgrouns
             image(
                 texture_depot.get(&TextureId::Background).unwrap(),
-                c.transform,
+                ctx.transform,
                 g,
             );
 
             // Paint slots
             game.get_slots().iter().for_each(|&s| {
                 let pos = s.get_position();
-                let context = c.trans(pos.x, pos.y);
+                let context = ctx.trans(pos.x, pos.y);
+
+                let texture;
+                if let Some(p) = s.get_payloads()[0] {
+                    texture = texture_depot.get(&p.cargo);
+                } else {
+                    texture = texture_depot.get(&TextureId::TileBlank);
+                }
+
                 Image::new_color([1.0, 1.0, 1.0, 0.85]).draw(
-                    texture_depot
-                        .get(&s.get_payloads()[0].unwrap().cargo)
-                        .unwrap(),
-                    &c.draw_state,
+                    texture.unwrap(),
+                    &ctx.draw_state,
+                    context.transform,
+                    g,
+                );
+            });
+
+            // Paint carriers
+            game.get_carriers().iter().for_each(|&c| {
+                let pos = c.get_position();
+                let context = ctx.trans(pos.x, pos.y);
+
+                let texture = texture_depot.get(&TextureId::Carrier);
+
+                Image::new_color([1.0, 1.0, 1.0, 1.0]).draw(
+                    texture.unwrap(),
+                    &ctx.draw_state,
                     context.transform,
                     g,
                 );
