@@ -89,8 +89,20 @@ fn load_textures(depot: &mut HashMap<TextureId, G2dTexture>, context: &mut G2dTe
     });
 }
 
-fn is_tile_delimiter(c: &char) -> bool {
-    *c == TILE_DELIMITER
+fn is_tile_delimiter(c: char) -> bool {
+    c == TILE_DELIMITER
+}
+
+fn is_empty_payload(c: char) -> bool {
+    c == EMPTY_PAYLOAD
+}
+
+fn char_to_payload(c: char) -> Option<swarm::Payload<TextureId>> {
+    if is_empty_payload(c) {
+        None
+    } else {
+        Some(Payload::new(TextureId::from_char(c)))
+    }
 }
 
 fn load_layout(game: &mut MyGameType, id: u32) -> Result<()> {
@@ -111,15 +123,11 @@ fn load_layout(game: &mut MyGameType, id: u32) -> Result<()> {
             let mut payload_being_set = None;
             line.unwrap()
                 .chars()
-                .filter(|c| !is_tile_delimiter(c))
+                .filter(|c| !is_tile_delimiter(*c))
                 .enumerate()
                 .for_each(|(x, c)| {
                     if flip_flop {
-                        payload_being_set = if c != '~' {
-                            Some(Payload::new(TextureId::from_char(c)))
-                        } else {
-                            None
-                        };
+                        payload_being_set = char_to_payload(c);
                         flip_flop = false;
                     } else {
                         game.add_slot(Slot::new(
@@ -127,11 +135,7 @@ fn load_layout(game: &mut MyGameType, id: u32) -> Result<()> {
                                 as f64,
                             (BOARD_TOP_MARGIN + (TILE_HEIGHT + TILE_SPACING) * y as u32) as f64,
                             payload_being_set,
-                            if c != '~' {
-                                Some(Payload::new(TextureId::from_char(c)))
-                            } else {
-                                None
-                            },
+                            char_to_payload(c),
                             swarm::SlotKind::CLASSIC,
                         ));
                         flip_flop = true;
