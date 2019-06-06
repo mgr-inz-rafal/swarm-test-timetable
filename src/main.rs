@@ -119,16 +119,16 @@ fn load_layout(game: &mut MyGameType, id: u32) -> Result<()> {
         })
         .enumerate()
         .for_each(|(y, line)| {
-            let mut flip_flop = true;
+            let mut setting_source_cargo = true;
             let mut payload_being_set = None;
             line.unwrap()
                 .chars()
                 .filter(|c| !is_tile_delimiter(*c))
                 .enumerate()
                 .for_each(|(x, c)| {
-                    if flip_flop {
+                    if setting_source_cargo {
                         payload_being_set = char_to_payload(c);
-                        flip_flop = false;
+                        setting_source_cargo = false;
                     } else {
                         game.add_slot(Slot::new(
                             (BOARD_LEFT_MARGIN + (TILE_WIDTH + TILE_SPACING) * (x / 2) as u32)
@@ -138,7 +138,7 @@ fn load_layout(game: &mut MyGameType, id: u32) -> Result<()> {
                             char_to_payload(c),
                             swarm::SlotKind::CLASSIC,
                         ));
-                        flip_flop = true;
+                        setting_source_cargo = true;
                     };
                 })
         });
@@ -174,7 +174,7 @@ fn main() -> Result<()> {
             // Clear
             clear([0.0; 4], g);
 
-            // Paint backgrouns
+            // Paint background
             image(
                 texture_depot.get(&TextureId::Background).unwrap(),
                 ctx.transform,
