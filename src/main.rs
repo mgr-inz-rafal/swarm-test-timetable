@@ -19,11 +19,19 @@ const BOARD_TOP_MARGIN: u32 =
     (SCREEN_SIZE_NATIVE[1] - (TILE_HEIGHT + TILE_SPACING) * TILES_PER_COLUMN) / 2;
 const TILE_DELIMITER: char = '^';
 const EMPTY_PAYLOAD: char = '~';
+const CARRIER_ANIM_SPEED: u32 = 8;
 
 #[derive(Copy, Clone, Eq, PartialEq, Hash)]
 enum TextureId {
     Background,
-    Carrier,
+    Carrier01,
+    Carrier02,
+    Carrier03,
+    Carrier04,
+    Carrier05,
+    Carrier06,
+    Carrier07,
+    Carrier08,
     Test,
     TileBlank,
     TileA,
@@ -49,14 +57,42 @@ struct TextureDef {
 
 type MyGameType = swarm::Swarm<TextureId>;
 
-const TEXTURE_REPOSITORY: [TextureDef; 7] = [
+const TEXTURE_REPOSITORY: [TextureDef; 14] = [
     TextureDef {
         id: TextureId::Test,
         path: "images/test_image.png",
     },
     TextureDef {
-        id: TextureId::Carrier,
-        path: "images/carrier/carrier.png",
+        id: TextureId::Carrier01,
+        path: "images/carrier/frame-1.png",
+    },
+    TextureDef {
+        id: TextureId::Carrier02,
+        path: "images/carrier/frame-2.png",
+    },
+    TextureDef {
+        id: TextureId::Carrier03,
+        path: "images/carrier/frame-3.png",
+    },
+    TextureDef {
+        id: TextureId::Carrier04,
+        path: "images/carrier/frame-4.png",
+    },
+    TextureDef {
+        id: TextureId::Carrier05,
+        path: "images/carrier/frame-5.png",
+    },
+    TextureDef {
+        id: TextureId::Carrier06,
+        path: "images/carrier/frame-6.png",
+    },
+    TextureDef {
+        id: TextureId::Carrier07,
+        path: "images/carrier/frame-7.png",
+    },
+    TextureDef {
+        id: TextureId::Carrier08,
+        path: "images/carrier/frame-8.png",
     },
     TextureDef {
         id: TextureId::Background,
@@ -160,6 +196,20 @@ fn main() -> Result<()> {
 
     let mut game = swarm::Swarm::new();
 
+    let carrier_frames: [TextureId; 8] = [
+        TextureId::Carrier01,
+        TextureId::Carrier02,
+        TextureId::Carrier03,
+        TextureId::Carrier04,
+        TextureId::Carrier05,
+        TextureId::Carrier06,
+        TextureId::Carrier07,
+        TextureId::Carrier08,
+    ];
+    let mut carrier_anim_cycle = carrier_frames.iter().cycle();
+    let mut carrier_anim_counter = 0;
+    let mut carrier_anim_texture = carrier_anim_cycle.next().unwrap();
+
     let mut ctx = window.create_texture_context();
     let mut texture_depot = HashMap::new();
     load_textures(&mut texture_depot, &mut ctx);
@@ -202,11 +252,16 @@ fn main() -> Result<()> {
             });
 
             // Paint carriers
+            carrier_anim_counter += 1;
+            if carrier_anim_counter == CARRIER_ANIM_SPEED {
+                carrier_anim_counter = 0;
+                carrier_anim_texture = carrier_anim_cycle.next().unwrap();
+            }
             game.get_carriers().iter().for_each(|&c| {
                 let pos = c.get_position();
                 let context = ctx.trans(pos.x, pos.y);
 
-                let texture = texture_depot.get(&TextureId::Carrier);
+                let texture = texture_depot.get(&carrier_anim_texture);
 
                 Image::new_color([1.0, 1.0, 1.0, 1.0]).draw(
                     texture.unwrap(),
