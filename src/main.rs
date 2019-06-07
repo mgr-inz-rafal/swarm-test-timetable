@@ -266,11 +266,23 @@ fn main() -> Result<()> {
                 if c.get_angle() > std::f64::consts::PI / 4.0
                     && c.get_angle() < (std::f64::consts::PI / 4.0) + std::f64::consts::PI
                 {
-                    context = context.flip_h();
+                    context = context.flip_h().trans(-40.0, 0.0);
                 }
 
-                let texture = texture_depot.get(&carrier_anim_texture);
+                // Paint payload
+                if let Some(p) = c.get_payload() {
+                    let texture = texture_depot.get(&p.cargo);
+                    let context = ctx.trans(pos.x, pos.y);
+                    Image::new_color([1.0, 1.0, 1.0, 0.85]).draw(
+                        texture.unwrap(),
+                        &context.draw_state,
+                        context.transform,
+                        g,
+                    );
+                }
 
+                // Paint carrier itself
+                let texture = texture_depot.get(&carrier_anim_texture);
                 Image::new_color([1.0, 1.0, 1.0, 1.0]).draw(
                     texture.unwrap(),
                     &ctx.draw_state,
