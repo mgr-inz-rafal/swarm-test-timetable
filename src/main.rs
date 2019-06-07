@@ -169,9 +169,10 @@ fn load_layout(game: &mut MyGameType, id: u32) -> Result<()> {
                         setting_source_cargo = false;
                     } else {
                         game.add_slot(Slot::new(
-                            (BOARD_LEFT_MARGIN + (TILE_WIDTH + TILE_SPACING) * (x / 2) as u32)
-                                as f64,
-                            (BOARD_TOP_MARGIN + (TILE_HEIGHT + TILE_SPACING) * y as u32) as f64,
+                            f64::from(
+                                BOARD_LEFT_MARGIN + (TILE_WIDTH + TILE_SPACING) * (x / 2) as u32,
+                            ),
+                            f64::from(BOARD_TOP_MARGIN + (TILE_HEIGHT + TILE_SPACING) * y as u32),
                             payload_being_set,
                             char_to_payload(c),
                             swarm::SlotKind::CLASSIC,
