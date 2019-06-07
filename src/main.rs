@@ -20,7 +20,7 @@ const BOARD_TOP_MARGIN: u32 =
 const TILE_DELIMITER: char = '^';
 const EMPTY_PAYLOAD: char = '~';
 const CARRIER_ANIM_SPEED: u32 = 8;
-const CARRIER_ICON_X_OFFSET: f64 = -10.0;
+const CARRIER_ICON_X_OFFSET: f64 = 0.0;
 const CARRIER_ICON_Y_OFFSET: f64 = -50.0;
 
 #[derive(Copy, Clone, Eq, PartialEq, Hash)]
@@ -261,8 +261,13 @@ fn main() -> Result<()> {
             }
             game.get_carriers().iter().for_each(|&c| {
                 let pos = c.get_position();
-                let context =
+                let mut context =
                     ctx.trans(pos.x + CARRIER_ICON_X_OFFSET, pos.y + CARRIER_ICON_Y_OFFSET);
+                if c.get_angle() > std::f64::consts::PI / 4.0
+                    && c.get_angle() < (std::f64::consts::PI / 4.0) + std::f64::consts::PI
+                {
+                    context = context.flip_h();
+                }
 
                 let texture = texture_depot.get(&carrier_anim_texture);
 
