@@ -36,17 +36,103 @@ enum TextureId {
     Carrier08,
     Test,
     TileBlank,
-    TileA,
-    TileR,
+    TileQ,
     TileW,
+    TileE,
+    TileR,
+    TileT,
+    TileY,
+    TileU,
+    TileI,
+    TileO,
+    TileP,
+    TileA,
+    TileS,
+    TileD,
+    TileF,
+    TileG,
+    TileH,
+    TileJ,
+    TileK,
+    TileL,
+    TileZ,
+    TileX,
+    TileC,
+    TileV,
+    TileB,
+    TileN,
+    TileM,
+    TileEpl,
+    TileOpl,
+    TileApl,
+    TileSpl,
+    TileLpl,
+    TileZpl,
+    TileXpl,
+    TileCpl,
+    TileNpl,
+    Tile0,
+    Tile1,
+    Tile2,
+    Tile3,
+    Tile4,
+    Tile5,
+    Tile6,
+    Tile7,
+    Tile8,
+    Tile9,
+    TileColon,
 }
 
 impl TextureId {
     fn from_char(c: char) -> TextureId {
         match c {
-            'A' | 'a' => TextureId::TileA,
-            'R' | 'r' => TextureId::TileR,
+            'Q' | 'q' => TextureId::TileQ,
             'W' | 'w' => TextureId::TileW,
+            'E' | 'e' => TextureId::TileE,
+            'R' | 'r' => TextureId::TileR,
+            'T' | 't' => TextureId::TileT,
+            'Y' | 'y' => TextureId::TileY,
+            'U' | 'u' => TextureId::TileU,
+            'I' | 'i' => TextureId::TileI,
+            'O' | 'o' => TextureId::TileO,
+            'P' | 'p' => TextureId::TileP,
+            'A' | 'a' => TextureId::TileA,
+            'S' | 's' => TextureId::TileS,
+            'D' | 'd' => TextureId::TileD,
+            'F' | 'f' => TextureId::TileF,
+            'G' | 'g' => TextureId::TileG,
+            'H' | 'h' => TextureId::TileH,
+            'J' | 'j' => TextureId::TileJ,
+            'K' | 'k' => TextureId::TileK,
+            'L' | 'l' => TextureId::TileL,
+            'Z' | 'z' => TextureId::TileZ,
+            'X' | 'x' => TextureId::TileX,
+            'C' | 'c' => TextureId::TileC,
+            'V' | 'v' => TextureId::TileV,
+            'B' | 'b' => TextureId::TileB,
+            'N' | 'n' => TextureId::TileN,
+            'M' | 'm' => TextureId::TileM,
+            'Ę' | 'ę' => TextureId::TileEpl,
+            'Ó' | 'ó' => TextureId::TileOpl,
+            'Ą' | 'ą' => TextureId::TileApl,
+            'Ś' | 'ś' => TextureId::TileSpl,
+            'Ł' | 'ł' => TextureId::TileLpl,
+            'Ż' | 'ż' => TextureId::TileZpl,
+            'Ź' | 'ź' => TextureId::TileXpl,
+            'Ć' | 'ć' => TextureId::TileCpl,
+            'Ń' | 'ń' => TextureId::TileNpl,
+            '0' => TextureId::Tile0,
+            '1' => TextureId::Tile1,
+            '2' => TextureId::Tile2,
+            '3' => TextureId::Tile3,
+            '4' => TextureId::Tile4,
+            '5' => TextureId::Tile5,
+            '6' => TextureId::Tile6,
+            '7' => TextureId::Tile7,
+            '8' => TextureId::Tile8,
+            '9' => TextureId::Tile9,
+            ':' => TextureId::TileColon,
             _ => TextureId::TileBlank,
         }
     }
@@ -59,7 +145,7 @@ struct TextureDef {
 
 type MyGameType = swarm::Swarm<TextureId>;
 
-const TEXTURE_REPOSITORY: [TextureDef; 14] = [
+const TEXTURE_REPOSITORY: [TextureDef; 57] = [
     TextureDef {
         id: TextureId::Test,
         path: "images/test_image.png",
@@ -105,16 +191,188 @@ const TEXTURE_REPOSITORY: [TextureDef; 14] = [
         path: "images/tiles/tile_blank.png",
     },
     TextureDef {
-        id: TextureId::TileA,
-        path: "images/tiles/tile_A.png",
+        id: TextureId::TileQ,
+        path: "images/tiles/tile_Q.png",
+    },
+    TextureDef {
+        id: TextureId::TileW,
+        path: "images/tiles/tile_W.png",
+    },
+    TextureDef {
+        id: TextureId::TileE,
+        path: "images/tiles/tile_E.png",
     },
     TextureDef {
         id: TextureId::TileR,
         path: "images/tiles/tile_R.png",
     },
     TextureDef {
-        id: TextureId::TileW,
-        path: "images/tiles/tile_W.png",
+        id: TextureId::TileT,
+        path: "images/tiles/tile_T.png",
+    },
+    TextureDef {
+        id: TextureId::TileY,
+        path: "images/tiles/tile_Y.png",
+    },
+    TextureDef {
+        id: TextureId::TileU,
+        path: "images/tiles/tile_U.png",
+    },
+    TextureDef {
+        id: TextureId::TileI,
+        path: "images/tiles/tile_I.png",
+    },
+    TextureDef {
+        id: TextureId::TileO,
+        path: "images/tiles/tile_O.png",
+    },
+    TextureDef {
+        id: TextureId::TileP,
+        path: "images/tiles/tile_P.png",
+    },
+    TextureDef {
+        id: TextureId::TileA,
+        path: "images/tiles/tile_A.png",
+    },
+    TextureDef {
+        id: TextureId::TileS,
+        path: "images/tiles/tile_S.png",
+    },
+    TextureDef {
+        id: TextureId::TileD,
+        path: "images/tiles/tile_D.png",
+    },
+    TextureDef {
+        id: TextureId::TileF,
+        path: "images/tiles/tile_F.png",
+    },
+    TextureDef {
+        id: TextureId::TileG,
+        path: "images/tiles/tile_G.png",
+    },
+    TextureDef {
+        id: TextureId::TileH,
+        path: "images/tiles/tile_H.png",
+    },
+    TextureDef {
+        id: TextureId::TileJ,
+        path: "images/tiles/tile_J.png",
+    },
+    TextureDef {
+        id: TextureId::TileK,
+        path: "images/tiles/tile_K.png",
+    },
+    TextureDef {
+        id: TextureId::TileL,
+        path: "images/tiles/tile_L.png",
+    },
+    TextureDef {
+        id: TextureId::TileZ,
+        path: "images/tiles/tile_Z.png",
+    },
+    TextureDef {
+        id: TextureId::TileX,
+        path: "images/tiles/tile_X.png",
+    },
+    TextureDef {
+        id: TextureId::TileC,
+        path: "images/tiles/tile_C.png",
+    },
+    TextureDef {
+        id: TextureId::TileV,
+        path: "images/tiles/tile_V.png",
+    },
+    TextureDef {
+        id: TextureId::TileB,
+        path: "images/tiles/tile_B.png",
+    },
+    TextureDef {
+        id: TextureId::TileN,
+        path: "images/tiles/tile_N.png",
+    },
+    TextureDef {
+        id: TextureId::TileM,
+        path: "images/tiles/tile_M.png",
+    },
+    TextureDef {
+        id: TextureId::TileEpl,
+        path: "images/tiles/tile_Epl.png",
+    },
+    TextureDef {
+        id: TextureId::TileOpl,
+        path: "images/tiles/tile_Opl.png",
+    },
+    TextureDef {
+        id: TextureId::TileApl,
+        path: "images/tiles/tile_Apl.png",
+    },
+    TextureDef {
+        id: TextureId::TileSpl,
+        path: "images/tiles/tile_Spl.png",
+    },
+    TextureDef {
+        id: TextureId::TileLpl,
+        path: "images/tiles/tile_Lpl.png",
+    },
+    TextureDef {
+        id: TextureId::TileZpl,
+        path: "images/tiles/tile_Zpl.png",
+    },
+    TextureDef {
+        id: TextureId::TileXpl,
+        path: "images/tiles/tile_Xpl.png",
+    },
+    TextureDef {
+        id: TextureId::TileCpl,
+        path: "images/tiles/tile_Cpl.png",
+    },
+    TextureDef {
+        id: TextureId::TileNpl,
+        path: "images/tiles/tile_Npl.png",
+    },
+    TextureDef {
+        id: TextureId::TileColon,
+        path: "images/tiles/tile_Colon.png",
+    },
+    TextureDef {
+        id: TextureId::Tile0,
+        path: "images/tiles/tile_0.png",
+    },
+    TextureDef {
+        id: TextureId::Tile1,
+        path: "images/tiles/tile_1.png",
+    },
+    TextureDef {
+        id: TextureId::Tile2,
+        path: "images/tiles/tile_2.png",
+    },
+    TextureDef {
+        id: TextureId::Tile3,
+        path: "images/tiles/tile_3.png",
+    },
+    TextureDef {
+        id: TextureId::Tile4,
+        path: "images/tiles/tile_4.png",
+    },
+    TextureDef {
+        id: TextureId::Tile5,
+        path: "images/tiles/tile_5.png",
+    },
+    TextureDef {
+        id: TextureId::Tile6,
+        path: "images/tiles/tile_6.png",
+    },
+    TextureDef {
+        id: TextureId::Tile7,
+        path: "images/tiles/tile_7.png",
+    },
+    TextureDef {
+        id: TextureId::Tile8,
+        path: "images/tiles/tile_8.png",
+    },
+    TextureDef {
+        id: TextureId::Tile9,
+        path: "images/tiles/tile_9.png",
     },
 ];
 
