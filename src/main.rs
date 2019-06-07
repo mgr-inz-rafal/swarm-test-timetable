@@ -219,6 +219,7 @@ fn main() -> Result<()> {
     load_layout(&mut game, 1)?;
 
     game.add_carrier(Carrier::new(50.0, 50.0));
+    game.add_carrier(Carrier::new(50.0, 50.0));
 
     while let Some(e) = window.next() {
         game.tick();
