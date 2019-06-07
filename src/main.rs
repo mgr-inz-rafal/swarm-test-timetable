@@ -1,11 +1,12 @@
 extern crate piston_window;
+#[macro_use(make_slot_pit, make_slot_spawner)]
 extern crate swarm;
 
 use piston_window::*;
 use std::collections::HashMap;
 use std::fs::File;
 use std::io::{BufRead, BufReader, Read, Result};
-use swarm::{Carrier, Payload, Slot};
+use swarm::{Carrier, Payload, Slot, SlotKind};
 
 const SCREEN_SIZE_NATIVE: [u32; 2] = [1920, 1080];
 const TILE_WIDTH: u32 = 44;
@@ -479,6 +480,9 @@ fn main() -> Result<()> {
 
     game.add_carrier(Carrier::new(50.0, 50.0));
     game.add_carrier(Carrier::new(50.0, 50.0));
+
+    game.add_slot(make_slot_pit!(600.0, -50.0));
+    game.add_slot(make_slot_spawner!(200.0, -50.0));
 
     while let Some(e) = window.next() {
         game.tick();
