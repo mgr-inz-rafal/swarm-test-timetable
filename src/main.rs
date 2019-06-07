@@ -1,8 +1,10 @@
 extern crate piston_window;
 #[macro_use(make_slot_pit, make_slot_spawner)]
 extern crate swarm;
+extern crate rand;
 
 use piston_window::*;
+use rand::Rng;
 use std::collections::HashMap;
 use std::fs::File;
 use std::io::{BufRead, BufReader, Read, Result};
@@ -23,6 +25,13 @@ const EMPTY_PAYLOAD: char = '~';
 const CARRIER_ANIM_SPEED: u32 = 8;
 const CARRIER_ICON_X_OFFSET: f64 = 0.0;
 const CARRIER_ICON_Y_OFFSET: f64 = -50.0;
+const NUMBER_OF_STATION_NAMES: usize = 4;
+const STATION_NAMES: [&'static str; NUMBER_OF_STATION_NAMES] = [
+    "Aleksandrów Kujawski",
+    "Białystok Bacieczki",
+    "Chełm Wąskotorowy",
+    "Daleszewo Gryfińskie",
+];
 
 #[derive(Copy, Clone, Eq, PartialEq, Hash)]
 enum TextureId {
@@ -444,6 +453,29 @@ fn load_layout(game: &mut MyGameType, id: u32) -> Result<()> {
     Ok(())
 }
 
+fn fill_row_with_text(game: &mut MyGameType, row: u32, text: &str) {
+    let slots = game.get_slots();
+    let start_index = row * TILES_PER_ROW;
+    let end_index = start_index + TILES_PER_ROW;
+    let mut last_name_index = 0;
+    text.chars().enumerate().for_each(|(i, v)| {
+        slots[start_index as usize + i].set_payloads(char_to_payload(v));
+        last_name_index = i;
+    });
+    for i in start_index as usize + last_name_index + 1..end_index as usize
+    {
+        slots[i].set_payloads(char_to_payload(EMPTY_PAYLOAD));
+    }
+}
+
+fn fill_with_station_names(game: &mut MyGameType) {
+    let mut rng = rand::thread_rng();
+    for i in 0..TILES_PER_COLUMN
+    {
+        fill_row_with_text(game, i, STATION_NAMES[rng.gen_range(0, NUMBER_OF_STATION_NAMES)]);
+    }
+}
+
 fn main() -> Result<()> {
     let opengl = OpenGL::V3_2;
     let mut window: PistonWindow = WindowSettings::new(
@@ -476,7 +508,8 @@ fn main() -> Result<()> {
     let mut texture_depot = HashMap::new();
     load_textures(&mut texture_depot, &mut ctx);
 
-    load_layout(&mut game, 1)?;
+    load_layout(&mut game, 2)?;
+    fill_with_station_names(&mut game);
 
     game.add_carrier(Carrier::new(50.0, 50.0));
     game.add_carrier(Carrier::new(50.0, 50.0));
