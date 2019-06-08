@@ -32,6 +32,8 @@ const CARRIER_ANIM_SPEED: u32 = 8;
 const CARRIER_ICON_X_OFFSET: f64 = 0.0;
 const CARRIER_ICON_Y_OFFSET: f64 = -50.0;
 const NUMBER_OF_STATION_NAMES: usize = 25;
+const TIME_DIFFERENCE_MINIMUM: i64 = 3;     // Minutes
+const TIME_DIFFERENCE_MAXMIMUM: i64 = 27;   // Minutes
 const STATION_NAMES: [&'static str; NUMBER_OF_STATION_NAMES] = [
     "Aleksandrów Kujawski",
     "Białystok Bacieczki",
@@ -537,11 +539,11 @@ fn fill_row_departure_time(game: &mut MyGameType, row: u32, time: DateTime<Utc>)
 }
 
 fn fill_departure_times(game: &mut MyGameType) {
-    let rng = rand::thread_rng();
+    let mut rng = rand::thread_rng();
     let mut departure_time = Utc::now();
     for i in 0..TILES_PER_COLUMN {
         fill_row_departure_time(game, i, departure_time);
-        departure_time = departure_time.add(Duration::minutes(3));
+        departure_time = departure_time.add(Duration::minutes(rng.gen_range(TIME_DIFFERENCE_MINIMUM, TIME_DIFFERENCE_MAXMIMUM)));
     }
 }
 
