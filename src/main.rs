@@ -25,12 +25,33 @@ const EMPTY_PAYLOAD: char = '~';
 const CARRIER_ANIM_SPEED: u32 = 8;
 const CARRIER_ICON_X_OFFSET: f64 = 0.0;
 const CARRIER_ICON_Y_OFFSET: f64 = -50.0;
-const NUMBER_OF_STATION_NAMES: usize = 4;
+const NUMBER_OF_STATION_NAMES: usize = 25;
 const STATION_NAMES: [&'static str; NUMBER_OF_STATION_NAMES] = [
     "Aleksandrów Kujawski",
     "Białystok Bacieczki",
     "Chełm Wąskotorowy",
+    "Ćmok",
     "Daleszewo Gryfińskie",
+    "Elektrociepłownia Siekierki",
+    "Frombork",
+    "Gdańsk Brzeźno",
+    "Huta Krzeszowska",
+    "Inowrocław Chemia",
+    "Jarocin",
+    "Katowice Szopienice",
+    "Lublin Tatary",
+    "Łagiewniki Dzierżoniowskie",
+    "Międzyzdroje",
+    "Nadolice Wielkie",
+    "Olsztyn Zachodni",
+    "Piła Główna",
+    "Rzeszów Załęże",
+    "Szczecin Dąbie",
+    "Toruń Port Drzewny",
+    "Ustka Koszary",
+    "Warszawa Centralna",
+    "Zabrze Makoszowy",
+    "Żagań",
 ];
 
 #[derive(Copy, Clone, Eq, PartialEq, Hash)]
@@ -453,27 +474,55 @@ fn load_layout(game: &mut MyGameType, id: u32) -> Result<()> {
     Ok(())
 }
 
+fn row_start_index(row: u32) -> u32 {
+    row * TILES_PER_ROW
+}
+
+fn row_end_index(row: u32) -> u32 {
+    row_start_index(row) + TILES_PER_ROW
+}
+
+fn slot_index(x: u32, y: u32) -> usize {
+    (y * TILES_PER_ROW + x) as usize
+}
+
 fn fill_row_with_text(game: &mut MyGameType, row: u32, text: &str) {
-    let slots = game.get_slots();
-    let start_index = row * TILES_PER_ROW;
-    let end_index = start_index + TILES_PER_ROW;
+    let slots = game.get_slots_mut();
+    let start_index = row_start_index(row);
+    let end_index = row_end_index(row);
     let mut last_name_index = 0;
     text.chars().enumerate().for_each(|(i, v)| {
         slots[start_index as usize + i].set_payloads(char_to_payload(v));
         last_name_index = i;
     });
-    for i in start_index as usize + last_name_index + 1..end_index as usize
-    {
+    for i in start_index as usize + last_name_index + 1..end_index as usize {
         slots[i].set_payloads(char_to_payload(EMPTY_PAYLOAD));
     }
 }
 
 fn fill_with_station_names(game: &mut MyGameType) {
     let mut rng = rand::thread_rng();
-    for i in 0..TILES_PER_COLUMN
-    {
-        fill_row_with_text(game, i, STATION_NAMES[rng.gen_range(0, NUMBER_OF_STATION_NAMES)]);
+    for i in 0..TILES_PER_COLUMN {
+        fill_row_with_text(
+            game,
+            i,
+            STATION_NAMES[rng.gen_range(0, NUMBER_OF_STATION_NAMES)],
+        );
     }
+}
+
+fn move_all_rows_up(slots: &mut Vec<swarm::Slot<TextureId>>) {
+    for y in 0..TILES_PER_COLUMN - 1 {
+        for x in 0..TILES_PER_ROW - 1 {
+            let payloads = slots[slot_index(x, y + 1)].get_payloads();
+            slots[slot_index(x, y)].set_target_payload(payloads[0]);
+        }
+    }
+}
+
+fn train_departure(game: &mut MyGameType) {
+    move_all_rows_up(game.get_slots_mut());
+    game.slot_data_changed();
 }
 
 fn main() -> Result<()> {
@@ -510,7 +559,9 @@ fn main() -> Result<()> {
 
     load_layout(&mut game, 2)?;
     fill_with_station_names(&mut game);
+    game.slot_data_changed();
 
+    game.add_carrier(Carrier::new(50.0, 50.0));
     game.add_carrier(Carrier::new(50.0, 50.0));
     game.add_carrier(Carrier::new(50.0, 50.0));
 
@@ -520,7 +571,15 @@ fn main() -> Result<()> {
     window.set_ups(60);
 
     while let Some(e) = window.next() {
-        e.update(|_| game.tick() );
+        e.update(|_| game.tick());
+
+        e.release(|args| {
+            if let piston_window::Button::Keyboard(k) = args {
+                if k == piston_window::Key::Space {
+                    train_departure(&mut game);
+                }
+            }
+        });
 
         window.draw_2d(&e, |ctx, g, _| {
             // Clear
