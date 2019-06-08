@@ -517,8 +517,11 @@ fn main() -> Result<()> {
     game.add_slot(make_slot_pit!(600.0, -50.0));
     game.add_slot(make_slot_spawner!(200.0, -50.0));
 
+    window.set_ups(60);
+
     while let Some(e) = window.next() {
-        game.tick();
+        e.update(|_| game.tick() );
+
         window.draw_2d(&e, |ctx, g, _| {
             // Clear
             clear([0.0; 4], g);
