@@ -7,4 +7,6 @@ edition = "2018"
 [dependencies]
 piston_window = "0.93.0"
 rand = "0.6.5"
+chrono = "*"
+time = "*"
 swarm = { path = "../swarm" }

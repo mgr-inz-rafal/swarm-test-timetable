@@ -1,13 +1,19 @@
 extern crate piston_window;
 #[macro_use(make_slot_pit, make_slot_spawner)]
 extern crate swarm;
+extern crate chrono;
 extern crate rand;
+extern crate time;
 
+use chrono::prelude::*;
+use time::Duration;
 use piston_window::*;
 use rand::Rng;
+use std::char;
 use std::collections::HashMap;
 use std::fs::File;
 use std::io::{BufRead, BufReader, Read, Result};
+use std::ops::Add;
 use swarm::{Carrier, Payload, Slot, SlotKind};
 
 const SCREEN_SIZE_NATIVE: [u32; 2] = [1920, 1080];
@@ -511,9 +517,44 @@ fn fill_with_station_names(game: &mut MyGameType) {
     }
 }
 
+fn fill_row_departure_time(game: &mut MyGameType, row: u32, time: DateTime<Utc>) {
+    let slots = game.get_slots_mut();
+    let end_index = row_end_index(row);
+
+    slots[(end_index - 2) as usize].set_payloads(char_to_payload(
+        char::from_digit(time.minute() / 10, 10).unwrap(),
+    ));
+    slots[(end_index - 1) as usize].set_payloads(char_to_payload(
+        char::from_digit(time.minute() % 10, 10).unwrap(),
+    ));
+
+    slots[(end_index - 5) as usize].set_payloads(char_to_payload(
+        char::from_digit(time.hour() / 10, 10).unwrap(),
+    ));
+    slots[(end_index - 4) as usize].set_payloads(char_to_payload(
+        char::from_digit(time.hour() % 10, 10).unwrap(),
+    ));
+}
+
+fn fill_departure_times(game: &mut MyGameType) {
+    let rng = rand::thread_rng();
+    let mut departure_time = Utc::now();
+    for i in 0..TILES_PER_COLUMN {
+        fill_row_departure_time(game, i, departure_time);
+        departure_time = departure_time.add(Duration::minutes(3));
+    }
+}
+
+fn fill_time_commas(game: &mut MyGameType) {
+    let slots = game.get_slots_mut();
+    for i in 0..TILES_PER_COLUMN {
+        slots[(row_end_index(i) - 3) as usize].set_payloads(char_to_payload(':'));
+    }
+}
+
 fn move_all_rows_up(slots: &mut Vec<swarm::Slot<TextureId>>) {
     for y in 0..TILES_PER_COLUMN - 1 {
-        for x in 0..TILES_PER_ROW - 1 {
+        for x in 0..TILES_PER_ROW {
             let payloads = slots[slot_index(x, y + 1)].get_payloads();
             slots[slot_index(x, y)].set_target_payload(payloads[0]);
         }
@@ -559,6 +600,8 @@ fn main() -> Result<()> {
 
     load_layout(&mut game, 2)?;
     fill_with_station_names(&mut game);
+    fill_time_commas(&mut game);
+    fill_departure_times(&mut game);
     game.slot_data_changed();
 
     game.add_carrier(Carrier::new(50.0, 50.0));
