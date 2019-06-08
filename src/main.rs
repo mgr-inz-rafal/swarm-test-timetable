@@ -21,7 +21,7 @@ const BOARD_LEFT_MARGIN: u32 =
 const BOARD_TOP_MARGIN: u32 =
     (SCREEN_SIZE_NATIVE[1] - (TILE_HEIGHT + TILE_SPACING) * TILES_PER_COLUMN) / 2;
 const TILE_DELIMITER: char = '^';
-const EMPTY_PAYLOAD: char = '~';
+const EMPTY_PAYLOAD: char = ' ';
 const CARRIER_ANIM_SPEED: u32 = 8;
 const CARRIER_ICON_X_OFFSET: f64 = 0.0;
 const CARRIER_ICON_Y_OFFSET: f64 = -50.0;
