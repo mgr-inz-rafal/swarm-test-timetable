@@ -494,17 +494,25 @@ fn slot_index(x: u32, y: u32) -> usize {
     (y * TILES_PER_ROW + x) as usize
 }
 
-fn fill_row_with_text(game: &mut MyGameType, row: u32, text: &str) {
+fn fill_row_with_text(game: &mut MyGameType, row: u32, text: &str, target_only: bool) {
     let slots = game.get_slots_mut();
     let start_index = row_start_index(row);
     let end_index = row_end_index(row);
     let mut last_name_index = 0;
     text.chars().enumerate().for_each(|(i, v)| {
-        slots[start_index as usize + i].set_payloads(char_to_payload(v));
+        if target_only {
+            slots[start_index as usize + i].set_target_payload(char_to_payload(v));
+        } else {
+            slots[start_index as usize + i].set_payloads(char_to_payload(v));
+        }
         last_name_index = i;
     });
     for i in start_index as usize + last_name_index + 1..end_index as usize {
-        slots[i].set_payloads(char_to_payload(EMPTY_PAYLOAD));
+        if target_only {
+            slots[i].set_target_payload(char_to_payload(EMPTY_PAYLOAD));
+        } else {
+            slots[i].set_payloads(char_to_payload(EMPTY_PAYLOAD));
+        }
     }
 }
 
@@ -515,6 +523,7 @@ fn fill_with_station_names(game: &mut MyGameType) {
             game,
             i,
             STATION_NAMES[rng.gen_range(0, NUMBER_OF_STATION_NAMES)],
+            false,
         );
     }
 }
@@ -565,8 +574,19 @@ fn move_all_rows_up(slots: &mut Vec<swarm::Slot<TextureId>>) {
     }
 }
 
+fn put_next_train_in_last_row(game: &mut MyGameType) {
+    let mut rng = rand::thread_rng();
+    fill_row_with_text(
+        game,
+        TILES_PER_COLUMN - 1,
+        STATION_NAMES[rng.gen_range(0, NUMBER_OF_STATION_NAMES)],
+        true,
+    );
+}
+
 fn train_departure(game: &mut MyGameType) {
     move_all_rows_up(game.get_slots_mut());
+    put_next_train_in_last_row(game);
     game.slot_data_changed();
 }
 
