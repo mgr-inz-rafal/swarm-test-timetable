@@ -34,6 +34,7 @@ const CARRIER_ICON_Y_OFFSET: f64 = -50.0;
 const NUMBER_OF_STATION_NAMES: usize = 25;
 const TIME_DIFFERENCE_MINIMUM: i64 = 13; // Minutes
 const TIME_DIFFERENCE_MAXMIMUM: i64 = 90; // Minutes
+const MAX_CARRIERS: u8 = 100;
 const STATION_NAMES: [&str; NUMBER_OF_STATION_NAMES] = [
     "Aleksandrów Kujawski",
     "Białystok Bacieczki",
@@ -507,7 +508,11 @@ fn fill_row_with_text(game: &mut MyGameType, row: u32, text: &str, target_only: 
         }
         last_name_index = i;
     });
-    for slot in slots.iter_mut().take(end_index as usize).skip(start_index as usize + last_name_index + 1) {
+    for slot in slots
+        .iter_mut()
+        .take(end_index as usize)
+        .skip(start_index as usize + last_name_index + 1)
+    {
         if target_only {
             slot.set_target_payload(char_to_payload(EMPTY_PAYLOAD));
         } else {
@@ -661,12 +666,11 @@ fn main() -> Result<()> {
     let mut last_time = fill_departure_times(&mut game);
     game.slot_data_changed();
 
-    game.add_carrier(Carrier::new(50.0, 50.0));
-    game.add_carrier(Carrier::new(50.0, 50.0));
-    game.add_carrier(Carrier::new(50.0, 50.0));
-    game.add_carrier(Carrier::new(50.0, 50.0));
-    game.add_carrier(Carrier::new(50.0, 50.0));
-    game.add_carrier(Carrier::new(50.0, 50.0));
+    game.add_carrier(Carrier::new(
+        f64::from(SCREEN_SIZE_NATIVE[0] / 2),
+        f64::from(SCREEN_SIZE_NATIVE[1] / 2),
+    ));
+    let mut current_carriers_count = game.get_carriers().len() as u8;
 
     game.add_slot(make_slot_pit!(600.0, -50.0));
     game.add_slot(make_slot_spawner!(200.0, -50.0));
@@ -678,80 +682,91 @@ fn main() -> Result<()> {
 
         e.release(|args| {
             if let piston_window::Button::Keyboard(k) = args {
-                if k == piston_window::Key::Space {
-                    last_time = train_departure(&mut game, last_time);
+                match k {
+                    piston_window::Key::Space => last_time = train_departure(&mut game, last_time),
+                    piston_window::Key::Plus | piston_window::Key::NumPadPlus => {
+                        if current_carriers_count < MAX_CARRIERS {
+                            game.add_carrier(Carrier::new(
+                                f64::from(SCREEN_SIZE_NATIVE[0] / 2),
+                                -75.0,
+                            ))
+                        }
+                    }
+                    _ => {}
                 }
             }
         });
 
-        window.draw_2d(&e, |ctx, g, _| {
-            // Clear
-            clear([0.0; 4], g);
+        e.render(|_| {
+            window.draw_2d(&e, |ctx, g, _| {
+                // Clear
+                clear([0.0; 4], g);
 
-            // Paint background
-            image(
-                texture_depot.get(&TextureId::Background).unwrap(),
-                ctx.transform,
-                g,
-            );
-
-            // Paint slots
-            game.get_slots().iter().for_each(|&s| {
-                let pos = s.get_position();
-                let context = ctx.trans(pos.x, pos.y);
-
-                let texture;
-                if let Some(p) = s.get_payloads()[0] {
-                    texture = texture_depot.get(&p.cargo);
-                } else {
-                    texture = texture_depot.get(&TextureId::TileBlank);
-                }
-
-                Image::new_color([1.0, 1.0, 1.0, 0.85]).draw(
-                    texture.unwrap(),
-                    &ctx.draw_state,
-                    context.transform,
+                // Paint background
+                image(
+                    texture_depot.get(&TextureId::Background).unwrap(),
+                    ctx.transform,
                     g,
                 );
-            });
 
-            // Paint carriers
-            carrier_anim_counter += 1;
-            if carrier_anim_counter == CARRIER_ANIM_SPEED {
-                carrier_anim_counter = 0;
-                carrier_anim_texture = carrier_anim_cycle.next().unwrap();
-            }
-            game.get_carriers().iter().for_each(|&c| {
-                let pos = c.get_position();
-                let mut context =
-                    ctx.trans(pos.x + CARRIER_ICON_X_OFFSET, pos.y + CARRIER_ICON_Y_OFFSET);
-                if c.get_angle() > std::f64::consts::PI / 4.0
-                    && c.get_angle() < (std::f64::consts::PI / 4.0) + std::f64::consts::PI
-                {
-                    context = context.flip_h().trans(-40.0, 0.0);
-                }
-
-                // Paint payload
-                if let Some(p) = c.get_payload() {
-                    let texture = texture_depot.get(&p.cargo);
+                // Paint slots
+                game.get_slots().iter().for_each(|&s| {
+                    let pos = s.get_position();
                     let context = ctx.trans(pos.x, pos.y);
+
+                    let texture;
+                    if let Some(p) = s.get_payloads()[0] {
+                        texture = texture_depot.get(&p.cargo);
+                    } else {
+                        texture = texture_depot.get(&TextureId::TileBlank);
+                    }
+
                     Image::new_color([1.0, 1.0, 1.0, 0.85]).draw(
                         texture.unwrap(),
-                        &context.draw_state,
+                        &ctx.draw_state,
                         context.transform,
                         g,
                     );
-                }
+                });
 
-                // Paint carrier itself
-                let texture = texture_depot.get(&carrier_anim_texture);
-                Image::new_color([1.0, 1.0, 1.0, 1.0]).draw(
-                    texture.unwrap(),
-                    &ctx.draw_state,
-                    context.transform,
-                    g,
-                );
-            });
+                // Paint carriers
+                carrier_anim_counter += 1;
+                if carrier_anim_counter == CARRIER_ANIM_SPEED {
+                    carrier_anim_counter = 0;
+                    carrier_anim_texture = carrier_anim_cycle.next().unwrap();
+                }
+                game.get_carriers().iter().for_each(|&c| {
+                    let pos = c.get_position();
+                    let mut context =
+                        ctx.trans(pos.x + CARRIER_ICON_X_OFFSET, pos.y + CARRIER_ICON_Y_OFFSET);
+                    if c.get_angle() > std::f64::consts::PI / 4.0
+                        && c.get_angle() < (std::f64::consts::PI / 4.0) + std::f64::consts::PI
+                    {
+                        context = context.flip_h().trans(-40.0, 0.0);
+                    }
+
+                    // Paint payload
+                    if let Some(p) = c.get_payload() {
+                        let texture = texture_depot.get(&p.cargo);
+                        let context = ctx.trans(pos.x, pos.y);
+                        Image::new_color([1.0, 1.0, 1.0, 0.85]).draw(
+                            texture.unwrap(),
+                            &context.draw_state,
+                            context.transform,
+                            g,
+                        );
+                    }
+
+                    // Paint carrier itself
+                    let texture = texture_depot.get(&carrier_anim_texture);
+                    Image::new_color([1.0, 1.0, 1.0, 1.0]).draw(
+                        texture.unwrap(),
+                        &ctx.draw_state,
+                        context.transform,
+                        g,
+                    );
+                });
+            })
         });
     }
 
