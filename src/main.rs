@@ -34,7 +34,7 @@ const CARRIER_ICON_Y_OFFSET: f64 = -50.0;
 const NUMBER_OF_STATION_NAMES: usize = 25;
 const TIME_DIFFERENCE_MINIMUM: i64 = 13; // Minutes
 const TIME_DIFFERENCE_MAXMIMUM: i64 = 90; // Minutes
-const STATION_NAMES: [&'static str; NUMBER_OF_STATION_NAMES] = [
+const STATION_NAMES: [&str; NUMBER_OF_STATION_NAMES] = [
     "Aleksandrów Kujawski",
     "Białystok Bacieczki",
     "Chełm Wąskotorowy",
@@ -507,11 +507,11 @@ fn fill_row_with_text(game: &mut MyGameType, row: u32, text: &str, target_only: 
         }
         last_name_index = i;
     });
-    for i in start_index as usize + last_name_index + 1..end_index as usize {
+    for slot in slots.iter_mut().take(end_index as usize).skip(start_index as usize + last_name_index + 1) {
         if target_only {
-            slots[i].set_target_payload(char_to_payload(EMPTY_PAYLOAD));
+            slot.set_target_payload(char_to_payload(EMPTY_PAYLOAD));
         } else {
-            slots[i].set_payloads(char_to_payload(EMPTY_PAYLOAD));
+            slot.set_payloads(char_to_payload(EMPTY_PAYLOAD));
         }
     }
 }
