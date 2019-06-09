@@ -671,6 +671,7 @@ fn main() -> Result<()> {
         f64::from(SCREEN_SIZE_NATIVE[1] / 2),
     ));
     let mut current_carriers_count = game.get_carriers().len() as u8;
+    let mut draw_carriers = true;
 
     game.add_slot(make_slot_pit!(600.0, -50.0));
     game.add_slot(make_slot_spawner!(200.0, -50.0));
@@ -684,8 +685,10 @@ fn main() -> Result<()> {
             if let piston_window::Button::Keyboard(k) = args {
                 match k {
                     piston_window::Key::Space => last_time = train_departure(&mut game, last_time),
+                    piston_window::Key::H => draw_carriers = !draw_carriers,
                     piston_window::Key::Plus | piston_window::Key::NumPadPlus => {
                         if current_carriers_count < MAX_CARRIERS {
+                            current_carriers_count += 1;
                             game.add_carrier(Carrier::new(
                                 f64::from(SCREEN_SIZE_NATIVE[0] / 2),
                                 -75.0,
@@ -758,13 +761,15 @@ fn main() -> Result<()> {
                     }
 
                     // Paint carrier itself
-                    let texture = texture_depot.get(&carrier_anim_texture);
-                    Image::new_color([1.0, 1.0, 1.0, 1.0]).draw(
-                        texture.unwrap(),
-                        &ctx.draw_state,
-                        context.transform,
-                        g,
-                    );
+                    if draw_carriers {
+                        let texture = texture_depot.get(&carrier_anim_texture);
+                        Image::new_color([1.0, 1.0, 1.0, 1.0]).draw(
+                            texture.unwrap(),
+                            &ctx.draw_state,
+                            context.transform,
+                            g,
+                        );
+                    }
                 });
             })
         });
