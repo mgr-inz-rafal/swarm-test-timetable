@@ -609,6 +609,9 @@ fn main() -> Result<()> {
     game.add_carrier(Carrier::new(50.0, 50.0));
     game.add_carrier(Carrier::new(50.0, 50.0));
     game.add_carrier(Carrier::new(50.0, 50.0));
+    game.add_carrier(Carrier::new(50.0, 50.0));
+    game.add_carrier(Carrier::new(50.0, 50.0));
+    game.add_carrier(Carrier::new(50.0, 50.0));
 
     game.add_slot(make_slot_pit!(600.0, -50.0));
     game.add_slot(make_slot_spawner!(200.0, -50.0));
