@@ -6,7 +6,6 @@ extern crate rand;
 extern crate time;
 
 use chrono::prelude::*;
-use time::Duration;
 use piston_window::*;
 use rand::Rng;
 use std::char;
@@ -15,6 +14,7 @@ use std::fs::File;
 use std::io::{BufRead, BufReader, Read, Result};
 use std::ops::Add;
 use swarm::{Carrier, Payload, Slot, SlotKind};
+use time::Duration;
 
 const SCREEN_SIZE_NATIVE: [u32; 2] = [1920, 1080];
 const TILE_WIDTH: u32 = 44;
@@ -32,8 +32,8 @@ const CARRIER_ANIM_SPEED: u32 = 8;
 const CARRIER_ICON_X_OFFSET: f64 = 0.0;
 const CARRIER_ICON_Y_OFFSET: f64 = -50.0;
 const NUMBER_OF_STATION_NAMES: usize = 25;
-const TIME_DIFFERENCE_MINIMUM: i64 = 3;     // Minutes
-const TIME_DIFFERENCE_MAXMIMUM: i64 = 27;   // Minutes
+const TIME_DIFFERENCE_MINIMUM: i64 = 3; // Minutes
+const TIME_DIFFERENCE_MAXMIMUM: i64 = 27; // Minutes
 const STATION_NAMES: [&'static str; NUMBER_OF_STATION_NAMES] = [
     "Aleksandrów Kujawski",
     "Białystok Bacieczki",
@@ -543,7 +543,9 @@ fn fill_departure_times(game: &mut MyGameType) {
     let mut departure_time = Utc::now();
     for i in 0..TILES_PER_COLUMN {
         fill_row_departure_time(game, i, departure_time);
-        departure_time = departure_time.add(Duration::minutes(rng.gen_range(TIME_DIFFERENCE_MINIMUM, TIME_DIFFERENCE_MAXMIMUM)));
+        departure_time = departure_time.add(Duration::minutes(
+            rng.gen_range(TIME_DIFFERENCE_MINIMUM, TIME_DIFFERENCE_MAXMIMUM),
+        ));
     }
 }
 
