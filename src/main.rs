@@ -32,8 +32,8 @@ const CARRIER_ANIM_SPEED: u32 = 8;
 const CARRIER_ICON_X_OFFSET: f64 = 0.0;
 const CARRIER_ICON_Y_OFFSET: f64 = -50.0;
 const NUMBER_OF_STATION_NAMES: usize = 25;
-const TIME_DIFFERENCE_MINIMUM: i64 = 3; // Minutes
-const TIME_DIFFERENCE_MAXMIMUM: i64 = 27; // Minutes
+const TIME_DIFFERENCE_MINIMUM: i64 = 13; // Minutes
+const TIME_DIFFERENCE_MAXMIMUM: i64 = 90; // Minutes
 const STATION_NAMES: [&'static str; NUMBER_OF_STATION_NAMES] = [
     "Aleksandrów Kujawski",
     "Białystok Bacieczki",
@@ -528,34 +528,60 @@ fn fill_with_station_names(game: &mut MyGameType) {
     }
 }
 
-fn fill_row_departure_time(game: &mut MyGameType, row: u32, time: DateTime<Utc>) {
+fn fill_row_departure_time(
+    game: &mut MyGameType,
+    row: u32,
+    time: DateTime<Utc>,
+    target_only: bool,
+) {
     let slots = game.get_slots_mut();
     let end_index = row_end_index(row);
 
-    slots[(end_index - 2) as usize].set_payloads(char_to_payload(
-        char::from_digit(time.minute() / 10, 10).unwrap(),
-    ));
-    slots[(end_index - 1) as usize].set_payloads(char_to_payload(
-        char::from_digit(time.minute() % 10, 10).unwrap(),
-    ));
+    if target_only {
+        slots[(end_index - 2) as usize].set_target_payload(char_to_payload(
+            char::from_digit(time.minute() / 10, 10).unwrap(),
+        ));
+        slots[(end_index - 1) as usize].set_target_payload(char_to_payload(
+            char::from_digit(time.minute() % 10, 10).unwrap(),
+        ));
 
-    slots[(end_index - 5) as usize].set_payloads(char_to_payload(
-        char::from_digit(time.hour() / 10, 10).unwrap(),
-    ));
-    slots[(end_index - 4) as usize].set_payloads(char_to_payload(
-        char::from_digit(time.hour() % 10, 10).unwrap(),
-    ));
-}
+        slots[(end_index - 5) as usize].set_target_payload(char_to_payload(
+            char::from_digit(time.hour() / 10, 10).unwrap(),
+        ));
+        slots[(end_index - 4) as usize].set_target_payload(char_to_payload(
+            char::from_digit(time.hour() % 10, 10).unwrap(),
+        ));
+    } else {
+        slots[(end_index - 2) as usize].set_payloads(char_to_payload(
+            char::from_digit(time.minute() / 10, 10).unwrap(),
+        ));
+        slots[(end_index - 1) as usize].set_payloads(char_to_payload(
+            char::from_digit(time.minute() % 10, 10).unwrap(),
+        ));
 
-fn fill_departure_times(game: &mut MyGameType) {
-    let mut rng = rand::thread_rng();
-    let mut departure_time = Utc::now();
-    for i in 0..TILES_PER_COLUMN {
-        fill_row_departure_time(game, i, departure_time);
-        departure_time = departure_time.add(Duration::minutes(
-            rng.gen_range(TIME_DIFFERENCE_MINIMUM, TIME_DIFFERENCE_MAXMIMUM),
+        slots[(end_index - 5) as usize].set_payloads(char_to_payload(
+            char::from_digit(time.hour() / 10, 10).unwrap(),
+        ));
+        slots[(end_index - 4) as usize].set_payloads(char_to_payload(
+            char::from_digit(time.hour() % 10, 10).unwrap(),
         ));
     }
+}
+
+fn increase_departure_time(time: DateTime<Utc>) -> DateTime<Utc> {
+    let mut rng = rand::thread_rng();
+    time.add(Duration::minutes(
+        rng.gen_range(TIME_DIFFERENCE_MINIMUM, TIME_DIFFERENCE_MAXMIMUM),
+    ))
+}
+
+fn fill_departure_times(game: &mut MyGameType) -> DateTime<Utc> {
+    let mut departure_time = Utc::now();
+    for i in 0..TILES_PER_COLUMN {
+        fill_row_departure_time(game, i, departure_time, false);
+        departure_time = increase_departure_time(departure_time);
+    }
+    departure_time
 }
 
 fn fill_time_commas(game: &mut MyGameType) {
@@ -574,7 +600,7 @@ fn move_all_rows_up(slots: &mut Vec<swarm::Slot<TextureId>>) {
     }
 }
 
-fn put_next_train_in_last_row(game: &mut MyGameType) {
+fn put_next_train_in_last_row(game: &mut MyGameType, time: DateTime<Utc>) {
     let mut rng = rand::thread_rng();
     fill_row_with_text(
         game,
@@ -582,12 +608,19 @@ fn put_next_train_in_last_row(game: &mut MyGameType) {
         STATION_NAMES[rng.gen_range(0, NUMBER_OF_STATION_NAMES)],
         true,
     );
+    fill_row_departure_time(game, TILES_PER_COLUMN - 1, time, true);
+
+    // Take special care about the HH:MM separator
+    game.get_slots_mut()[slot_index(TILES_PER_ROW - 3, TILES_PER_COLUMN - 1)]
+        .set_payloads(char_to_payload(':'));
 }
 
-fn train_departure(game: &mut MyGameType) {
+fn train_departure(game: &mut MyGameType, last_time: DateTime<Utc>) -> DateTime<Utc> {
+    let next_time = increase_departure_time(last_time);
     move_all_rows_up(game.get_slots_mut());
-    put_next_train_in_last_row(game);
+    put_next_train_in_last_row(game, next_time);
     game.slot_data_changed();
+    next_time
 }
 
 fn main() -> Result<()> {
@@ -625,7 +658,7 @@ fn main() -> Result<()> {
     load_layout(&mut game, 2)?;
     fill_with_station_names(&mut game);
     fill_time_commas(&mut game);
-    fill_departure_times(&mut game);
+    let mut last_time = fill_departure_times(&mut game);
     game.slot_data_changed();
 
     game.add_carrier(Carrier::new(50.0, 50.0));
@@ -646,7 +679,7 @@ fn main() -> Result<()> {
         e.release(|args| {
             if let piston_window::Button::Keyboard(k) = args {
                 if k == piston_window::Key::Space {
-                    train_departure(&mut game);
+                    last_time = train_departure(&mut game, last_time);
                 }
             }
         });
