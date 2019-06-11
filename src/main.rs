@@ -183,7 +183,7 @@ struct TextureDef {
     path: &'static str,
 }
 
-type MyGameType = swarm::Swarm<TextureId>;
+type MyGameType = swarm::Swarm<TextureId, &'static Fn()>;
 
 const TEXTURE_REPOSITORY: [TextureDef; 57] = [
     TextureDef {
@@ -628,6 +628,11 @@ fn train_departure(game: &mut MyGameType, last_time: DateTime<Utc>) -> DateTime<
     next_time
 }
 
+fn dupa() 
+{
+    println!("Dupa");
+}
+
 fn main() -> Result<()> {
     let opengl = OpenGL::V3_2;
     let mut window: PistonWindow = WindowSettings::new(
@@ -640,7 +645,8 @@ fn main() -> Result<()> {
     .build()
     .unwrap();
 
-    let mut game = swarm::Swarm::new();
+    let mut game = swarm::Swarm::<TextureId, &Fn()>::new();
+    game.set_callback_shift_finished(Some(&dupa));
 
     let carrier_frames: [TextureId; 8] = [
         TextureId::Carrier01,
