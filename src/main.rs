@@ -183,7 +183,7 @@ struct TextureDef {
     path: &'static str,
 }
 
-type MyGameType = swarm::Swarm<TextureId, &'static Fn()>;
+type MyGameType = swarm::Swarm<TextureId>;
 
 const TEXTURE_REPOSITORY: [TextureDef; 57] = [
     TextureDef {
@@ -628,11 +628,6 @@ fn train_departure(game: &mut MyGameType, last_time: DateTime<Utc>) -> DateTime<
     next_time
 }
 
-fn dupa() 
-{
-    println!("Dupa");
-}
-
 fn main() -> Result<()> {
     let opengl = OpenGL::V3_2;
     let mut window: PistonWindow = WindowSettings::new(
@@ -645,8 +640,8 @@ fn main() -> Result<()> {
     .build()
     .unwrap();
 
-    let mut game = swarm::Swarm::<TextureId, &Fn()>::new();
-    game.set_callback_shift_finished(Some(&dupa));
+    let mut allow_next_departure = false;
+    let mut game = swarm::Swarm::<TextureId>::new();
 
     let carrier_frames: [TextureId; 8] = [
         TextureId::Carrier01,
@@ -685,12 +680,21 @@ fn main() -> Result<()> {
     window.set_ups(60);
 
     while let Some(e) = window.next() {
-        e.update(|_| game.tick());
+        e.update(|_| {
+            if game.tick() {
+                allow_next_departure = true
+            }
+        });
 
         e.release(|args| {
             if let piston_window::Button::Keyboard(k) = args {
                 match k {
-                    piston_window::Key::Space => last_time = train_departure(&mut game, last_time),
+                    piston_window::Key::Space => {
+                        if allow_next_departure {
+                            last_time = train_departure(&mut game, last_time);
+                            allow_next_departure = false
+                        }
+                    }
                     piston_window::Key::H => draw_carriers = !draw_carriers,
                     piston_window::Key::Plus | piston_window::Key::NumPadPlus => {
                         if current_carriers_count < MAX_CARRIERS {
