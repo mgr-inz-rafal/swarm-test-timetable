@@ -1,6 +1,6 @@
 extern crate piston_window;
 #[macro_use(make_slot_pit, make_slot_spawner)]
-extern crate swarm;
+extern crate swarm_it;
 extern crate chrono;
 extern crate rand;
 extern crate time;
@@ -13,7 +13,7 @@ use std::collections::HashMap;
 use std::fs::File;
 use std::io::{BufRead, BufReader, Read, Result};
 use std::ops::Add;
-use swarm::{Carrier, Payload, Slot, SlotKind};
+use swarm_it::{Carrier, Payload, Slot, SlotKind};
 use time::Duration;
 
 const SCREEN_SIZE_NATIVE: [u32; 2] = [1920, 1080];
@@ -31,37 +31,10 @@ const EMPTY_PAYLOAD: char = ' ';
 const CARRIER_ANIM_SPEED: u32 = 8;
 const CARRIER_ICON_X_OFFSET: f64 = 0.0;
 const CARRIER_ICON_Y_OFFSET: f64 = -50.0;
-const NUMBER_OF_STATION_NAMES: usize = 25;
+const MAX_STATION_NAME_LENGTH: usize = 31;
 const TIME_DIFFERENCE_MINIMUM: i64 = 13; // Minutes
 const TIME_DIFFERENCE_MAXMIMUM: i64 = 90; // Minutes
 const MAX_CARRIERS: u8 = 100;
-const STATION_NAMES: [&str; NUMBER_OF_STATION_NAMES] = [
-    "Aleksandrów Kujawski",
-    "Białystok Bacieczki",
-    "Chełm Wąskotorowy",
-    "Ćmok",
-    "Daleszewo Gryfińskie",
-    "Elektrociepłownia Siekierki",
-    "Frombork",
-    "Gdańsk Brzeźno",
-    "Huta Krzeszowska",
-    "Inowrocław Chemia",
-    "Jarocin",
-    "Katowice Szopienice",
-    "Lublin Tatary",
-    "Łagiewniki Dzierżoniowskie",
-    "Międzyzdroje",
-    "Nadolice Wielkie",
-    "Olsztyn Zachodni",
-    "Piła Główna",
-    "Rzeszów Załęże",
-    "Szczecin Dąbie",
-    "Toruń Port Drzewny",
-    "Ustka Koszary",
-    "Warszawa Centralna",
-    "Zabrze Makoszowy",
-    "Żagań",
-];
 
 #[derive(Copy, Clone, Eq, PartialEq, Hash)]
 enum TextureId {
@@ -127,6 +100,11 @@ enum TextureId {
 impl TextureId {
     fn from_char(c: char) -> TextureId {
         match c {
+            '(' => TextureId::TileQ,
+            ')' => TextureId::TileQ,
+            '-' => TextureId::TileQ,
+            '.' => TextureId::TileQ,
+
             'Q' | 'q' => TextureId::TileQ,
             'W' | 'w' => TextureId::TileW,
             'E' | 'e' => TextureId::TileE,
@@ -183,7 +161,7 @@ struct TextureDef {
     path: &'static str,
 }
 
-type MyGameType = swarm::Swarm<TextureId>;
+type MyGameType = swarm_it::Swarm<TextureId>;
 
 const TEXTURE_REPOSITORY: [TextureDef; 57] = [
     TextureDef {
@@ -433,7 +411,7 @@ fn is_empty_payload(c: char) -> bool {
     c == EMPTY_PAYLOAD
 }
 
-fn char_to_payload(c: char) -> Option<swarm::Payload<TextureId>> {
+fn char_to_payload(c: char) -> Option<swarm_it::Payload<TextureId>> {
     if is_empty_payload(c) {
         None
     } else {
@@ -473,7 +451,7 @@ fn load_layout(game: &mut MyGameType, id: u32) -> Result<()> {
                             f64::from(BOARD_TOP_MARGIN + (TILE_HEIGHT + TILE_SPACING) * y as u32),
                             payload_being_set,
                             char_to_payload(c),
-                            swarm::SlotKind::CLASSIC,
+                            swarm_it::SlotKind::CLASSIC,
                         ));
                         setting_source_cargo = true;
                     };
@@ -521,13 +499,13 @@ fn fill_row_with_text(game: &mut MyGameType, row: u32, text: &str, target_only: 
     }
 }
 
-fn fill_with_station_names(game: &mut MyGameType) {
+fn fill_with_station_names(game: &mut MyGameType, stations: &Vec<String>) {
     let mut rng = rand::thread_rng();
     for i in 0..TILES_PER_COLUMN {
         fill_row_with_text(
             game,
             i,
-            STATION_NAMES[rng.gen_range(0, NUMBER_OF_STATION_NAMES)],
+            &stations[rng.gen_range(0, stations.len())],
             false,
         );
     }
@@ -596,7 +574,7 @@ fn fill_time_commas(game: &mut MyGameType) {
     }
 }
 
-fn move_all_rows_up(slots: &mut Vec<swarm::Slot<TextureId>>) {
+fn move_all_rows_up(slots: &mut Vec<swarm_it::Slot<TextureId>>) {
     for y in 0..TILES_PER_COLUMN - 1 {
         for x in 0..TILES_PER_ROW {
             let payloads = slots[slot_index(x, y + 1)].get_payloads();
@@ -605,12 +583,11 @@ fn move_all_rows_up(slots: &mut Vec<swarm::Slot<TextureId>>) {
     }
 }
 
-fn put_next_train_in_last_row(game: &mut MyGameType, time: DateTime<Utc>) {
-    let mut rng = rand::thread_rng();
+fn put_next_train_in_last_row(game: &mut MyGameType, time: DateTime<Utc>, new_station: &str) {
     fill_row_with_text(
         game,
         TILES_PER_COLUMN - 1,
-        STATION_NAMES[rng.gen_range(0, NUMBER_OF_STATION_NAMES)],
+        new_station,
         true,
     );
     fill_row_departure_time(game, TILES_PER_COLUMN - 1, time, true);
@@ -620,12 +597,30 @@ fn put_next_train_in_last_row(game: &mut MyGameType, time: DateTime<Utc>) {
         .set_payloads(char_to_payload(':'));
 }
 
-fn train_departure(game: &mut MyGameType, last_time: DateTime<Utc>) -> DateTime<Utc> {
+fn train_departure(game: &mut MyGameType, last_time: DateTime<Utc>, new_station: &str) -> DateTime<Utc> {
     let next_time = increase_departure_time(last_time);
     move_all_rows_up(game.get_slots_mut());
-    put_next_train_in_last_row(game, next_time);
+    put_next_train_in_last_row(game, next_time, new_station);
     game.slot_data_changed();
     next_time
+}
+
+fn load_station_names(list: &mut Vec<String>, file: &str) -> Result<()> {
+    println!("Loading stations from '{}'", file);
+    let file = File::open(file)?;
+    let buffer = BufReader::new(file);
+    buffer
+        .lines()
+        .for_each(|line| list.push(line.unwrap()));
+
+    println!("{} station(s) loaded", list.len());
+    Ok(())
+}
+
+fn get_random_station_name(station_names: &Vec<String>) -> &str
+{
+    let mut rng = rand::thread_rng();
+    &station_names[rng.gen_range(0, station_names.len())]
 }
 
 fn main() -> Result<()> {
@@ -641,7 +636,7 @@ fn main() -> Result<()> {
     .unwrap();
 
     let mut allow_next_departure = false;
-    let mut game = swarm::Swarm::<TextureId>::new();
+    let mut game = swarm_it::Swarm::<TextureId>::new();
 
     let carrier_frames: [TextureId; 8] = [
         TextureId::Carrier01,
@@ -656,13 +651,14 @@ fn main() -> Result<()> {
     let mut carrier_anim_cycle = carrier_frames.iter().cycle();
     let mut carrier_anim_counter = 0;
     let mut carrier_anim_texture = carrier_anim_cycle.next().unwrap();
+    let mut station_names = Vec::new();
 
     let mut ctx = window.create_texture_context();
     let mut texture_depot = HashMap::new();
     load_textures(&mut texture_depot, &mut ctx);
-
+    load_station_names(&mut station_names, "stations/poland.txt")?;
     load_layout(&mut game, 2)?;
-    fill_with_station_names(&mut game);
+    fill_with_station_names(&mut game, &station_names);
     fill_time_commas(&mut game);
     let mut last_time = fill_departure_times(&mut game);
     game.slot_data_changed();
@@ -691,7 +687,7 @@ fn main() -> Result<()> {
                 match k {
                     piston_window::Key::Space => {
                         if allow_next_departure {
-                            last_time = train_departure(&mut game, last_time);
+                            last_time = train_departure(&mut game, last_time, get_random_station_name(&station_names));
                             allow_next_departure = false
                         }
                     }
