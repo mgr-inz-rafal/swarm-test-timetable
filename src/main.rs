@@ -500,12 +500,11 @@ fn fill_row_with_text(game: &mut MyGameType, row: u32, text: &str, target_only: 
 }
 
 fn fill_with_station_names(game: &mut MyGameType, stations: &Vec<String>) {
-    let mut rng = rand::thread_rng();
     for i in 0..TILES_PER_COLUMN {
         fill_row_with_text(
             game,
             i,
-            &stations[rng.gen_range(0, stations.len())],
+            get_random_station_name(stations),
             false,
         );
     }
