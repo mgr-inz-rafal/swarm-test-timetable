@@ -668,7 +668,7 @@ fn main() -> Result<()> {
     let mut ctx = window.create_texture_context();
     let mut texture_depot = HashMap::new();
     load_textures(&mut texture_depot, &mut ctx);
-    load_station_names(&mut station_names, "stations/poland.txt")?;
+    load_station_names(&mut station_names, "stations/uk.txt")?;
     load_layout(&mut game, 2)?;
     fill_with_station_names(&mut game, &station_names);
     fill_time_commas(&mut game);
