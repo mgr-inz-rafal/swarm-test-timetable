@@ -478,14 +478,17 @@ fn fill_row_with_text(game: &mut MyGameType, row: u32, text: &str, target_only: 
     let start_index = row_start_index(row);
     let end_index = row_end_index(row);
     let mut last_name_index = 0;
-    text.chars().enumerate().take(MAX_STATION_NAME_LENGTH).for_each(|(i, v)| {
-        if target_only {
-            slots[start_index as usize + i].set_target_payload(char_to_payload(v));
-        } else {
-            slots[start_index as usize + i].set_payloads(char_to_payload(v));
-        }
-        last_name_index = i;
-    });
+    text.chars()
+        .enumerate()
+        .take(MAX_STATION_NAME_LENGTH)
+        .for_each(|(i, v)| {
+            if target_only {
+                slots[start_index as usize + i].set_target_payload(char_to_payload(v));
+            } else {
+                slots[start_index as usize + i].set_payloads(char_to_payload(v));
+            }
+            last_name_index = i;
+        });
     for slot in slots
         .iter_mut()
         .take(end_index as usize)
@@ -501,12 +504,7 @@ fn fill_row_with_text(game: &mut MyGameType, row: u32, text: &str, target_only: 
 
 fn fill_with_station_names(game: &mut MyGameType, stations: &Vec<String>) {
     for i in 0..TILES_PER_COLUMN {
-        fill_row_with_text(
-            game,
-            i,
-            get_random_station_name(stations),
-            false,
-        );
+        fill_row_with_text(game, i, get_random_station_name(stations), false);
     }
 }
 
@@ -583,12 +581,7 @@ fn move_all_rows_up(slots: &mut Vec<swarm_it::Slot<TextureId>>) {
 }
 
 fn put_next_train_in_last_row(game: &mut MyGameType, time: DateTime<Utc>, new_station: &str) {
-    fill_row_with_text(
-        game,
-        TILES_PER_COLUMN - 1,
-        new_station,
-        true,
-    );
+    fill_row_with_text(game, TILES_PER_COLUMN - 1, new_station, true);
     fill_row_departure_time(game, TILES_PER_COLUMN - 1, time, true);
 
     // Take special care about the HH:MM separator
@@ -596,7 +589,11 @@ fn put_next_train_in_last_row(game: &mut MyGameType, time: DateTime<Utc>, new_st
         .set_payloads(char_to_payload(':'));
 }
 
-fn train_departure(game: &mut MyGameType, last_time: DateTime<Utc>, new_station: &str) -> DateTime<Utc> {
+fn train_departure(
+    game: &mut MyGameType,
+    last_time: DateTime<Utc>,
+    new_station: &str,
+) -> DateTime<Utc> {
     let next_time = increase_departure_time(last_time);
     move_all_rows_up(game.get_slots_mut());
     put_next_train_in_last_row(game, next_time, new_station);
@@ -608,16 +605,13 @@ fn load_station_names(list: &mut Vec<String>, file: &str) -> Result<()> {
     println!("Loading stations from '{}'", file);
     let file = File::open(file)?;
     let buffer = BufReader::new(file);
-    buffer
-        .lines()
-        .for_each(|line| list.push(line.unwrap()));
+    buffer.lines().for_each(|line| list.push(line.unwrap()));
 
     println!("{} station(s) loaded", list.len());
     Ok(())
 }
 
-fn get_random_station_name(station_names: &Vec<String>) -> &str
-{
+fn get_random_station_name(station_names: &Vec<String>) -> &str {
     let mut rng = rand::thread_rng();
     &station_names[rng.gen_range(0, station_names.len())]
 }
@@ -686,7 +680,11 @@ fn main() -> Result<()> {
                 match k {
                     piston_window::Key::Space => {
                         if allow_next_departure {
-                            last_time = train_departure(&mut game, last_time, get_random_station_name(&station_names));
+                            last_time = train_departure(
+                                &mut game,
+                                last_time,
+                                get_random_station_name(&station_names),
+                            );
                             allow_next_departure = false
                         }
                     }
