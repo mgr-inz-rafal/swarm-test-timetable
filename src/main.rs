@@ -478,7 +478,7 @@ fn fill_row_with_text(game: &mut MyGameType, row: u32, text: &str, target_only: 
     let start_index = row_start_index(row);
     let end_index = row_end_index(row);
     let mut last_name_index = 0;
-    text.chars().enumerate().for_each(|(i, v)| {
+    text.chars().enumerate().take(MAX_STATION_NAME_LENGTH).for_each(|(i, v)| {
         if target_only {
             slots[start_index as usize + i].set_target_payload(char_to_payload(v));
         } else {
