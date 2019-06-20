@@ -95,16 +95,15 @@ enum TextureId {
     Tile8,
     Tile9,
     TileColon,
+    TileOpenBracket,
+    TileCloseBracket,
+    TileDash,
+    TileDot,
 }
 
 impl TextureId {
     fn from_char(c: char) -> TextureId {
         match c {
-            '(' => TextureId::TileQ,
-            ')' => TextureId::TileQ,
-            '-' => TextureId::TileQ,
-            '.' => TextureId::TileQ,
-
             'Q' | 'q' => TextureId::TileQ,
             'W' | 'w' => TextureId::TileW,
             'E' | 'e' => TextureId::TileE,
@@ -151,6 +150,10 @@ impl TextureId {
             '8' => TextureId::Tile8,
             '9' => TextureId::Tile9,
             ':' => TextureId::TileColon,
+            '(' => TextureId::TileOpenBracket,
+            ')' => TextureId::TileCloseBracket,
+            '-' => TextureId::TileDash,
+            '.' => TextureId::TileDot,
             _ => TextureId::TileBlank,
         }
     }
@@ -163,7 +166,7 @@ struct TextureDef {
 
 type MyGameType = swarm_it::Swarm<TextureId>;
 
-const TEXTURE_REPOSITORY: [TextureDef; 57] = [
+const TEXTURE_REPOSITORY: [TextureDef; 61] = [
     TextureDef {
         id: TextureId::Test,
         path: "images/test_image.png",
@@ -351,6 +354,22 @@ const TEXTURE_REPOSITORY: [TextureDef; 57] = [
     TextureDef {
         id: TextureId::TileColon,
         path: "images/tiles/tile_Colon.png",
+    },
+    TextureDef {
+        id: TextureId::TileOpenBracket,
+        path: "images/tiles/tile_openbracket.png",
+    },
+    TextureDef {
+        id: TextureId::TileCloseBracket,
+        path: "images/tiles/tile_closebracket.png",
+    },
+    TextureDef {
+        id: TextureId::TileDash,
+        path: "images/tiles/tile_dash.png",
+    },
+    TextureDef {
+        id: TextureId::TileDot,
+        path: "images/tiles/tile_dot.png",
     },
     TextureDef {
         id: TextureId::Tile0,
