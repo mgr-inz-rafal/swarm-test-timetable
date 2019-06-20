@@ -99,6 +99,8 @@ enum TextureId {
     TileCloseBracket,
     TileDash,
     TileDot,
+    TileAmp,
+    TileApostrophe
 }
 
 impl TextureId {
@@ -154,6 +156,8 @@ impl TextureId {
             ')' => TextureId::TileCloseBracket,
             '-' => TextureId::TileDash,
             '.' => TextureId::TileDot,
+            '&' => TextureId::TileAmp,
+            '\'' => TextureId::TileApostrophe,
             _ => TextureId::TileBlank,
         }
     }
@@ -166,7 +170,7 @@ struct TextureDef {
 
 type MyGameType = swarm_it::Swarm<TextureId>;
 
-const TEXTURE_REPOSITORY: [TextureDef; 61] = [
+const TEXTURE_REPOSITORY: [TextureDef; 63] = [
     TextureDef {
         id: TextureId::Test,
         path: "images/test_image.png",
@@ -370,6 +374,14 @@ const TEXTURE_REPOSITORY: [TextureDef; 61] = [
     TextureDef {
         id: TextureId::TileDot,
         path: "images/tiles/tile_dot.png",
+    },
+    TextureDef {
+        id: TextureId::TileAmp,
+        path: "images/tiles/tile_amp.png",
+    },
+    TextureDef {
+        id: TextureId::TileApostrophe,
+        path: "images/tiles/tile_apostrophe.png",
     },
     TextureDef {
         id: TextureId::Tile0,
