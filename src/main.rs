@@ -100,7 +100,7 @@ enum TextureId {
     TileDash,
     TileDot,
     TileAmp,
-    TileApostrophe
+    TileApostrophe,
 }
 
 impl TextureId {
