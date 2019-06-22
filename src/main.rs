@@ -533,7 +533,7 @@ fn fill_row_with_text(game: &mut MyGameType, row: u32, text: &str, target_only: 
     }
 }
 
-fn fill_with_station_names(game: &mut MyGameType, stations: &Vec<String>) {
+fn fill_with_station_names(game: &mut MyGameType, stations: &[String]) {
     for i in 0..TILES_PER_COLUMN {
         fill_row_with_text(game, i, get_random_station_name(stations), false);
     }
@@ -642,7 +642,7 @@ fn load_station_names(list: &mut Vec<String>, file: &str) -> Result<()> {
     Ok(())
 }
 
-fn get_random_station_name(station_names: &Vec<String>) -> &str {
+fn get_random_station_name(station_names: &[String]) -> &str {
     let mut rng = rand::thread_rng();
     &station_names[rng.gen_range(0, station_names.len())]
 }
