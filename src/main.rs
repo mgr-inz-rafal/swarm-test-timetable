@@ -694,7 +694,11 @@ fn main() -> Result<()> {
     let mut current_carriers_count = game.get_carriers().len() as u8;
     let mut draw_carriers = true;
 
-    game.add_slot(make_slot_pit!(600.0, -50.0));
+    game.add_slot(make_slot_pit!(-75.0, f64::from(SCREEN_SIZE_NATIVE[1] / 2)));
+    game.add_slot(make_slot_pit!(
+        f64::from(SCREEN_SIZE_NATIVE[0] + 75),
+        f64::from(SCREEN_SIZE_NATIVE[1] / 2)
+    ));
     game.add_slot(make_slot_spawner!(200.0, -50.0));
 
     window.set_ups(60);
