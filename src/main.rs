@@ -699,7 +699,11 @@ fn main() -> Result<()> {
         f64::from(SCREEN_SIZE_NATIVE[0] + 75),
         f64::from(SCREEN_SIZE_NATIVE[1] / 2)
     ));
-    game.add_slot(make_slot_spawner!(200.0, -50.0));
+    game.add_slot(make_slot_spawner!(-75.0, f64::from(SCREEN_SIZE_NATIVE[1] / 2)));
+    game.add_slot(make_slot_spawner!(
+        f64::from(SCREEN_SIZE_NATIVE[0] + 75),
+        f64::from(SCREEN_SIZE_NATIVE[1] / 2)
+    ));
 
     window.set_ups(60);
 
