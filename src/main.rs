@@ -687,10 +687,11 @@ fn main() -> Result<()> {
     let mut last_time = fill_departure_times(&mut game);
     game.slot_data_changed();
 
-    game.add_carrier(Carrier::new(
+    let index = game.add_carrier(Carrier::new(
         f64::from(SCREEN_SIZE_NATIVE[0] / 2),
         f64::from(SCREEN_SIZE_NATIVE[1] / 2),
     ));
+    game.set_carrier_acceleration(index, 0.02);
     let mut current_carriers_count = game.get_carriers().len() as u8;
     let mut draw_carriers = true;
 
@@ -699,7 +700,10 @@ fn main() -> Result<()> {
         f64::from(SCREEN_SIZE_NATIVE[0] + 75),
         f64::from(SCREEN_SIZE_NATIVE[1] / 2)
     ));
-    game.add_slot(make_slot_spawner!(-75.0, f64::from(SCREEN_SIZE_NATIVE[1] / 2)));
+    game.add_slot(make_slot_spawner!(
+        -75.0,
+        f64::from(SCREEN_SIZE_NATIVE[1] / 2)
+    ));
     game.add_slot(make_slot_spawner!(
         f64::from(SCREEN_SIZE_NATIVE[0] + 75),
         f64::from(SCREEN_SIZE_NATIVE[1] / 2)
@@ -734,7 +738,7 @@ fn main() -> Result<()> {
                             game.add_carrier(Carrier::new(
                                 f64::from(SCREEN_SIZE_NATIVE[0] / 2),
                                 -75.0,
-                            ))
+                            ));
                         }
                     }
                     _ => {}
