@@ -35,6 +35,7 @@ const MAX_STATION_NAME_LENGTH: usize = 31;
 const TIME_DIFFERENCE_MINIMUM: i64 = 13; // Minutes
 const TIME_DIFFERENCE_MAXMIMUM: i64 = 90; // Minutes
 const MAX_CARRIERS: u8 = 100;
+const CARRIER_ACCELERATION: f64 = 0.09;
 
 #[derive(Copy, Clone, Eq, PartialEq, Hash)]
 enum TextureId {
@@ -691,7 +692,7 @@ fn main() -> Result<()> {
         f64::from(SCREEN_SIZE_NATIVE[0] / 2),
         f64::from(SCREEN_SIZE_NATIVE[1] / 2),
     ));
-    game.set_carrier_acceleration(index, 0.02);
+    game.set_carrier_acceleration(index, CARRIER_ACCELERATION);
     let mut current_carriers_count = game.get_carriers().len() as u8;
     let mut draw_carriers = true;
 
@@ -735,10 +736,11 @@ fn main() -> Result<()> {
                     piston_window::Key::Plus | piston_window::Key::NumPadPlus => {
                         if current_carriers_count < MAX_CARRIERS {
                             current_carriers_count += 1;
-                            game.add_carrier(Carrier::new(
+                            let index = game.add_carrier(Carrier::new(
                                 f64::from(SCREEN_SIZE_NATIVE[0] / 2),
                                 -75.0,
                             ));
+                            game.set_carrier_acceleration(index, CARRIER_ACCELERATION);
                         }
                     }
                     _ => {}
