@@ -648,6 +648,11 @@ fn get_random_station_name(station_names: &[String]) -> &str {
     &station_names[rng.gen_range(0, station_names.len())]
 }
 
+fn is_facing_left(carrier: &swarm_it::Carrier<TextureId>) -> bool {
+    let angle = carrier.get_angle();
+    (angle > (std::f64::consts::PI / 2.0)) && (angle < ((3.0 / 2.0) * std::f64::consts::PI))
+}
+
 fn main() -> Result<()> {
     let opengl = OpenGL::V3_2;
     let mut window: PistonWindow = WindowSettings::new(
@@ -717,6 +722,8 @@ fn main() -> Result<()> {
             if game.tick() {
                 allow_next_departure = true
             }
+            let carriers = game.get_carriers();
+            println!("{}", carriers[0].get_angle());
         });
 
         e.release(|args| {
@@ -790,9 +797,7 @@ fn main() -> Result<()> {
                     let pos = c.get_position();
                     let mut context =
                         ctx.trans(pos.x + CARRIER_ICON_X_OFFSET, pos.y + CARRIER_ICON_Y_OFFSET);
-                    if c.get_angle() > std::f64::consts::PI / 4.0
-                        && c.get_angle() < (std::f64::consts::PI / 4.0) + std::f64::consts::PI
-                    {
+                    if (is_facing_left(&c)) {
                         context = context.flip_h().trans(-40.0, 0.0);
                     }
 
