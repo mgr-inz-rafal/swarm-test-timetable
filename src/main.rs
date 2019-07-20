@@ -722,8 +722,6 @@ fn main() -> Result<()> {
             if game.tick() {
                 allow_next_departure = true
             }
-            let carriers = game.get_carriers();
-            println!("{}", carriers[0].get_angle());
         });
 
         e.release(|args| {
