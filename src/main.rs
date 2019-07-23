@@ -35,7 +35,8 @@ const MAX_STATION_NAME_LENGTH: usize = 31;
 const TIME_DIFFERENCE_MINIMUM: i64 = 13; // Minutes
 const TIME_DIFFERENCE_MAXMIMUM: i64 = 90; // Minutes
 const MAX_CARRIERS: u8 = 100;
-const CARRIER_ACCELERATION: f64 = 0.09;
+const CARRIER_ACCELERATION: f64 = 0.16;
+const CARRIER_MAX_SPEED: f64 = 24.0;
 
 #[derive(Copy, Clone, Eq, PartialEq, Hash)]
 enum TextureId {
@@ -655,7 +656,9 @@ fn is_facing_left(carrier: &swarm_it::Carrier<TextureId>) -> bool {
 
 fn add_one_carrier(game: &mut MyGameType, x: f64, y: f64) {
     let index = game.add_carrier(Carrier::new(x, y));
-    game.get_carriers_mut()[index].set_acceleration(CARRIER_ACCELERATION);
+    let carrier = &mut game.get_carriers_mut()[index];
+    carrier.set_acceleration(CARRIER_ACCELERATION);
+    carrier.set_max_speed(CARRIER_MAX_SPEED);
 }
 
 fn main() -> Result<()> {
@@ -724,6 +727,7 @@ fn main() -> Result<()> {
     while let Some(e) = window.next() {
         e.update(|_| {
             if game.tick() {
+                println!("{}", game.get_carriers()[0].get_max_speed());
                 allow_next_departure = true
             }
         });
