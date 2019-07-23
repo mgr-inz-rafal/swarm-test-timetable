@@ -697,7 +697,7 @@ fn main() -> Result<()> {
         f64::from(SCREEN_SIZE_NATIVE[0] / 2),
         f64::from(SCREEN_SIZE_NATIVE[1] / 2),
     ));
-    game.set_carrier_acceleration(index, CARRIER_ACCELERATION);
+    game.get_carriers_mut()[index].set_acceleration(CARRIER_ACCELERATION);
     let mut current_carriers_count = game.get_carriers().len() as u8;
     let mut draw_carriers = true;
 
@@ -745,7 +745,7 @@ fn main() -> Result<()> {
                                 f64::from(SCREEN_SIZE_NATIVE[0] / 2),
                                 -75.0,
                             ));
-                            game.set_carrier_acceleration(index, CARRIER_ACCELERATION);
+                            game.get_carriers_mut()[index].set_acceleration(CARRIER_ACCELERATION)
                         }
                     }
                     _ => {}
@@ -795,7 +795,7 @@ fn main() -> Result<()> {
                     let pos = c.get_position();
                     let mut context =
                         ctx.trans(pos.x + CARRIER_ICON_X_OFFSET, pos.y + CARRIER_ICON_Y_OFFSET);
-                    if (is_facing_left(&c)) {
+                    if is_facing_left(&c) {
                         context = context.flip_h().trans(-40.0, 0.0);
                     }
 
