@@ -653,6 +653,11 @@ fn is_facing_left(carrier: &swarm_it::Carrier<TextureId>) -> bool {
     (angle > (std::f64::consts::PI / 2.0)) && (angle < ((3.0 / 2.0) * std::f64::consts::PI))
 }
 
+fn add_one_carrier(game: &mut MyGameType, x: f64, y: f64) {
+    let index = game.add_carrier(Carrier::new(x, y));
+    game.get_carriers_mut()[index].set_acceleration(CARRIER_ACCELERATION);
+}
+
 fn main() -> Result<()> {
     let opengl = OpenGL::V3_2;
     let mut window: PistonWindow = WindowSettings::new(
@@ -692,12 +697,11 @@ fn main() -> Result<()> {
     fill_time_commas(&mut game);
     let mut last_time = fill_departure_times(&mut game);
     game.slot_data_changed();
-
-    let index = game.add_carrier(Carrier::new(
+    add_one_carrier(
+        &mut game,
         f64::from(SCREEN_SIZE_NATIVE[0] / 2),
         f64::from(SCREEN_SIZE_NATIVE[1] / 2),
-    ));
-    game.get_carriers_mut()[index].set_acceleration(CARRIER_ACCELERATION);
+    );
     let mut current_carriers_count = game.get_carriers().len() as u8;
     let mut draw_carriers = true;
 
@@ -741,11 +745,7 @@ fn main() -> Result<()> {
                     piston_window::Key::Plus | piston_window::Key::NumPadPlus => {
                         if current_carriers_count < MAX_CARRIERS {
                             current_carriers_count += 1;
-                            let index = game.add_carrier(Carrier::new(
-                                f64::from(SCREEN_SIZE_NATIVE[0] / 2),
-                                -75.0,
-                            ));
-                            game.get_carriers_mut()[index].set_acceleration(CARRIER_ACCELERATION)
+                            add_one_carrier(&mut game, f64::from(SCREEN_SIZE_NATIVE[0] / 2), -75.0);
                         }
                     }
                     _ => {}
