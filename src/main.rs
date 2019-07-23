@@ -727,7 +727,6 @@ fn main() -> Result<()> {
     while let Some(e) = window.next() {
         e.update(|_| {
             if game.tick() {
-                println!("{}", game.get_carriers()[0].get_max_speed());
                 allow_next_departure = true
             }
         });
