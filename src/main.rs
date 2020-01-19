@@ -359,7 +359,7 @@ const TEXTURE_REPOSITORY: [TextureDef; 63] = [
     },
     TextureDef {
         id: TextureId::TileColon,
-        path: "images/tiles/tile_Colon.png",
+        path: "images/tiles/tile_colon.png",
     },
     TextureDef {
         id: TextureId::TileOpenBracket,
@@ -429,6 +429,7 @@ const TEXTURE_REPOSITORY: [TextureDef; 63] = [
 
 fn load_textures(depot: &mut HashMap<TextureId, G2dTexture>, context: &mut G2dTextureContext) {
     TEXTURE_REPOSITORY.iter().for_each(|x| {
+        println!("{:?}", x.path);
         depot.insert(
             x.id,
             Texture::from_path(context, x.path, Flip::None, &TextureSettings::new()).unwrap(),
