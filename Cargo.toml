@@ -9,4 +9,4 @@ piston_window = "0.93.0"
 rand = "0.6.5"
 chrono = "0.4.6"
 time = "0.1.42"
-swarm_it = { path = "../swarm" }
+swarm_it = "0.1.1"
